@@ -1,7 +1,90 @@
 \chapter{Obiectivele proiectului}\label{ch:obiective}
 \pagestyle{fancy}
+Obiectivul acestui proiect este de a oferi utilizatorului un sistem precis si scalabil pentru monitorizarea in timp real a parametrilor de temperatura si 
+umiditate dintr-un mediu. Sistemul integreaza achizitia de date precise de la senzori cu utilizarea unor protocoale de incredere pentru comunicarea si 
+stocarea datelor care, in final, sunt puse la dispozitia utilizatorului intr-o platforma de vizualizare si control al datelor usor accesibila. Platforma este 
+bazata pe sistemul de operare Android si poate fi accesata de la distanta din orice locatie in care internetul este accesibil. De asemenea, platforma ofera 
+o reprezentare grafica a datelor din trecut pentru a facilita analiza acestora.
 
-{\noindent\color{blue}Se va întinde pe 2-3 pagini.\\}
+\section{Cerinte functionale}\label{sec:cerinte_functionale}
+\subsection{Interfata cu utilizatorul}\label{subsec:cf_interfata}
+\begin{itemize}
+    \item utilizatorul trebuie sa poata instala senzori noi
+    \item utilizatorul trebuie sa poata sterge un senzor din lista 
+    \item utilizatorul trebuie sa fie ghidat in timpul instalarii unui nou senzor cu sfaturi si informatii utile
+    \item utilizatorul trebuie sa poata vizualiza toti senzorii instalati sub forma de lista
+    \item utilizatorul trebuie sa poata accesa la alegere un senzor din lista si sa obtina informatii despre acesta
+    \item fiecare senzor trebuie sa afiseze statusul conectivitatii in dreptul numelui direct in lista
+    \item fiecare senzor trebuie sa aiba pagina lui proprie in care sunt afisate detaliile acestuia si datele achizitionate 
+    \item datele de temperatura si umiditate trebuie actualizate in timp real si trebuie sa afiseze unitatea de masura specifica fiecarei valori
+    \item datele istorice trebuie afisate sub forma grafica
+    \item utilizatorul trebuie sa poata vizualiza marcajul temporal si valorile exacte ale metricilor prin selectarea unui punct din grafic.
+    \item utilizatorul trebuie sa poata alege perioada pe care vizualiza datele in grafic
+    \item utilizatorul trebuie sa poata alege intervalul de achizitionare al datelor
+    \item utilizatorul trebuie sa poata seta parametrii de receptie ai alarmelor
+    \item utilizatorul trebuie sa poata reseta senzorul la setarile din fabrica prin mentinerea apasata a unui buton timp de 10 secunde 
+    \item senzorul trebuie sa ofere o lumina led care sa indice statusul lui pe parcursul instalarii.
+\end{itemize}
 
-În acest capitol se prezintă tema propriu-zisă (sub forma unei teme de proiectare sau cercetare, formulată exact, cu obiective clare și eventuale figuri explicative).
+\subsection{Transmiterea datelor}\label{subsec:cf_transmitere}
+Sistemul trebuie sa transmita datele catre utilizator si unitatea centrala utilizand un protocol fara fir, de exemplu Wi-Fi, si sa asigure integritatea 
+datelor prin utilizarea unui protocol de comunicatie bazat pe cerere si raspuns.
+ 
+\subsection{Colectarea datelor}\label{subsec:cnf_colectare}
+Sistemul trebuie sa colecteze date de la toti senzorii si sa asigure respectarea intervalelor specificate de catre fiecare utilizator.
 
+\subsection{Salvarea datelor}\label{subsec:cnf_salvare}
+Sistemul trebuie sa adauge o unitate de timp la datele achizitionate de la senzori si sa le salveze intr-o baza de date adecvata pentru tipul si 
+structura acestora si sa asigure interogarea eficienta.
+
+\section{Cerinte non-functionale}\label{sec:cerinte_nonfunctionale}
+\subsection{Performanta}\label{subsec:cnf_performanta}
+Timpul de raspuns al sistemului este esential pentru monitorizarea in timp real al datelor si pentru receptionarea de alerte. Durata acestuia trebuie 
+sa fie de sub o secunda si este compusa din durata de achizitie, procesare si transmitere a datelor catre unitatea centrala, durata de procesare si 
+redirectionare catre aplicatia Android si durata de procesare si afisare a datelor de catre aplicatie. Aceasta metrica este in stransa relatie cu 
+utilizarea protocolului de comunicatie MQTT specializat pe timpul de raspuns scurt. 
+
+In cazul afisarii datelor din trecut, timpul de raspuns al sistemului este compus din durata de transmisie a unei cereri, procesarea acesteia si returnarea
+datelor cerute. Sistemul asigura o durata scurta de raspuns prin controlul debitului datelor. Acest control este realizat prin afisarea grafica a metricilor
+de temperatura si umiditate care presupune afisarea unei serii restranse de date, de exemplu, datele care au fost acumulate in 12 ore.
+
+Latenta sistemului este definita de perioada dintre inceputul achizitiei temperaturii si a umiditatii si afisarea datelor in aplicatia Android. Pentru 
+monitorizarea datelor atat in timp real cat si istorice aceasta metrica este foarte importanta, deoarece o schimbare radicala in valorile extrase din mediu 
+nu mai este relevanta daca de la momentul in care a fost extrasa si pana la momentul in care utilizatorul o observa a trecut mult timp.
+
+\subsection{Scalabilitate}\label{subsec:cnf_scalabilitate}
+Scalabilitatea sistemului consta in numarul de senzori care pot fi conectati la un utilizator si in numarul de utilizatori care pot fi administrati 
+in acelasi timp fara a afecta performanta sistemului. Acesta trebuie sa utilizeze un protocol de comunicatie care necesita un trafic de date mic pentru 
+mentinerea conexiunii si care are un volum mic de date utile pentru a asigura un nivel de scalabilitate crescut.
+
+\subsection{Utilizabilitate}\label{subsec:cnf_utilizabilitate}
+Aplicatia trebuie sa ofere utilizatorului o experienta placuta si facila. Utilizatorul trebuie sa fie ghidat si sa aiba la dispozitie informatiile necesare
+instalarii unui senzor nou fara sa fie necesare cunostinte tehnice. Vizualizarea statusului conexiunii si a datelor trebuie sa fie intuitiva.
+
+\subsection{Administrarea datelor}\label{subsec:cnf_administrare}
+Sistemul trebuie sa ofere o structura a bazei de date care sa asigure pastrarea datelor pe durate de timp foarte mari, de ordinul anilor, si care sa 
+raspunda rapid si eficient interogarilor de date de la utilizatori. Utilizarea unei baze de date de tip serie in timp este potrivita in acest context, 
+deoarece utilizeaza tehnici de reordonare si restructurare bazate pe cel mai utilizat tip de interogare.
+
+\subsection{Mentenabilitate}\label{subsec:cnf_mentenabilitate}
+Scalabilitatea verticala este reprezentata de capacitatea de dezvoltare a sistemului prin inbunatatirea software-ului sau prin adaugarea de resurse 
+suplimentare. Acest tip de scalabilitate este obtinut prin utilizarea unui sistem distribuit in care fiecare componenta are o sarcina bine definita 
+si un volum scazut ceea ce face ca timpul necesar operatiunilor de modificare sau imbunatatire sa fie scurt.
+
+\section{Cazuri de utilizare}\label{sec:cazuri_de_utilizare}
+\subsection{Instalare senzor}\label{subsec:cdu_instalare}
+Acest caz de utilizare are loc la achizitia unui nou senzor sau la resetarea unui senzor actual:
+\begin{enumerate}
+    \item Deschiderea aplicatiei
+    \item Accesarea butonului de instalare senzor
+    \item Parcurgerea pasilor de instalare descrisi direct in aplicatie
+    \item Vizualizarea senzorului in lista
+\end{enumerate}
+\subsection{Monitorizare date}\label{subsec:cdu_monitorizare}
+\begin{enumerate}
+    \item Deschiderea aplicatiei
+    \item Cautarea in lista a senzorului pentru care se doreste Vizualizarea
+    \item Accesarea senzorului dorit
+    \item Vizualizare date curente in timp real
+    \item Vizualizare date istorice sub forma de grafic
+\end{enumerate}
