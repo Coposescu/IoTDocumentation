@@ -97,20 +97,142 @@ a bateriei.
 \subsection{SPI}\label{sec:spi}
 \subsection{I2C}\label{sec:i2c}
 \section{Modele abstracte}\label{sec:modele}
-\subsection{RESTful API utilizand framework-ul Flask}\label{sec:flask}
-RESTful API vine de la Representational State Transfer Appication Programming Interface si reprezinta un set de reguli care trebuie respectate in construirea 
-unei arhitecturi web pentru a beneficia de cerinte non-functionale precum, un grad mare de scalabilitate, reliabilitate si adaptabilitate. 
-Acest set de reguli are ca scop decuplarea in grad cat mai mare a clientului de sarcinile serverului.
+\subsection{RESTful API}\label{sec:restapi}
+RESTful semnifica Representational State Transfer Application Programmin Interface si reprezinta un set de reguli care trebuie respectate in construirea 
+unei arhitecturi web pentru a beneficia de cerinte non-functionale precum, un grad mare de scalabilitate, reliabilitate si adaptabilitate. Acest set de 
+reguli are ca scop decuplarea in grad cat mai mare a clientului de sarcinile serverului. In paragrafele urmatoare se vor detalia caracteristicile cheie 
+ale stilului arhitectural RESTful.
 
-Framework-ul Flask este o arhitectura software de module reutilizabile care are scopul de a automatiza si standardiza modul in care sunt scrise aplicatiile 
-web. Acesta este scris in limbajul de programare Python si este denumit micro-framework, deoarece are o complexitate redusa si nu necesita biblioteci externe 
-pentru functionalitatile comune unei apicatii web, cum ar fi operatiile pe o baza de date.
+API semnifica Application Programming Interface si reprezinta o interfata intre client si server in care atributiile serverului sunt de a oferi 
+clientului servicii prin care acesta poate obtine si stoca date intr-o baza de date. Alte functionalitati care se doresc a fi implementate trebuie 
+sa fie in sarcina clientului, deci clientul trebuie sa se asigure ca cererea pe care o trimite catre server contine toate informatiile necesare. 
+De exemplu, serverul nu retine informatii de securitate, ci aceste informatii trebuie continute in pachetul trimis de catre cient.
 
-In paragrafele urmatoare se vor detalia caracteristicile cheie ale standardului arhitectural RESTful si ale framework-ului Flask.
+Figura \ref{fig:RESTfulStructure} prezinta structura unei arhitecturi RESTful. Fiecare modul va fi descris in paragrafele urmatoare.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.7]{figs/RESTfulStructure.png}
+    \caption{Structura arhitecturii RESTful}
+    \label{fig:RESTfulStructure}
+\end{figure}
+
+Principalul modul din arhitectura RESTful este modulul Resources, care semnifica resursa. O resursa reprezinta un set de date pe care un client il poate 
+cere serverului prin transmiterea unui URL. Detalii despre URL se gasesc in capitolul \ref{sec:http}. Acesta reprezinta un identificator unic pentru 
+fiecare resursa. Nu este necesar ca o resursa sa implementeze toate metodele HTTP, daca o metoda nu este implementata va fi returnat raspunsul de eroare 
+405 semificand ca metoda nu este permisa. Exemplu de tranzactie intre client si server cu accentul pe resurse:
+\begin{enumerate}
+	\item clientul trimite un URL catre server
+	\item serverul identifica resursa asociata URL-ului
+	\item serverul interogheaza baza de date pentru resursa specificata
+	\item serverul trimite un raspun care contine resursa ceruta si un status al tranzactiei
+\end{enumerate}
+
+Modulul Routes se ocupa de partea de rutare a cererilor primite de la client. Acest modul identifica pe baza adresei URL resursa de care clientul are nevoie, 
+iar apoi informeaza modulul Resource Manager in legatura cu aceasta resursa.
+
+Modulul Model se ocupa de operatiile cu baza de date, operatiile CRUD. Aceste operatii sunt creare, citire, modificare si stergere a unei intrari din 
+baza de date. Rezultatul operatiei cu baza de date este returnat modulului Resource Manager.
+
+Modulul Resource Manager este modulul central al acestei structuri si se ocupa cu extragerea resursei primita de la modulul Routes si a metodelor specifice 
+acesteia, de exemplu, metodele HTTP GET si POST. Bazat pe aceste metode, modulul Resource Manager interogheaza baza de date. Raspunsul primit de la baza de date 
+este validat si trimis catre modulul View.
+
+Modulul View are sarcina de a formata datele primite de la modulul Resource Maganer in structura la care clientul se asteapta, apoi trimitand raspunsul catre 
+client. 
+
+Arhitectura RESTful API este asemanatoare cu modelul de design MVC, care semnifica Model View Controller si reprezinta o structurare a software-ului intern 
+in trei module separate, Model si View care sunt identice cu modelele Model si View din RESTful API si Controller care inlocuieste modulul resource Manager 
+din RESTful API.
+
+Setul de reguli ce trebuie respectate pentru implementarea unei arhitecturi RESTful cuprind:
+\begin{enumerate}
+	\item Arhitectura aplicatiei trebuie sa fie de tipul client-server. Clientul trebuie separat de srever si de operatiile cu baza de date. Fiecare 
+    participant al unei tranzactii trebuie sa fie independent de ceilalti.
+	\item Lipsa starii inseamna ca o cerere trimisa de client trebuie sa contina toate informatiile necesare pentu ca aceasta sa fie onorata. Serverul 
+	nu are voie sa retina informatii legate de client.
+    \item Interfata uniforma specifica ca structura adreselor URL trebuie sa fie definita foarte clar, deoarece acestea reprezinta identificatorii unici 
+    ai resurselor si implicit indentificarea corecta a resursei dorite.
+    \item Clientul sau o alta componenta din retea poate sa retina raspunsurile de la server care sunt semnalate ca fiind memorabile cu scopul 
+    optimizarii. 
+    \item System pe nivele inseamna ca fiecare nivel este constient doar de nivelele din imediata apropiere a lui si ca intre server si client mai pot fi 
+    adaugate nivele precum un server proxy.
+\end{enumerate}
+
+O metoda de versionare a software-ului unui server este prin adaugarea in adresa URL a unui numar care sa identifice unic o versiune, de exemplu, v1.1. 
+Astfel se elimina problemele in care dupa o imbunatatire a software-ului, clientii care nu au aplicat modificarea nu mai pot accesa anumite resurse. 
+Dezavantajul acestei metode este complexitatea software-ului din server care creste cu fiecare imbunatatire. Cu toate acestea, este considerata metoda 
+cea mai avantajoasa.
+
+\subsection{Flask framework}\label{sec:flask}
+Framework-ul Flask este o biblioteca software de module reutilizabile care are scopul de a automatiza si standardiza modul in care sunt scrise aplicatiile 
+web. Acesta este scris in limbajul de programare Python si este denumit micro-framework, deoarece are o complexitate redusa. Acesta contine doar module 
+cu functionalitati de baza necesare in creearea unei aplicatii web, alte functionalitati care se doresc in aplicatie, cum ar fi utilizarea unei baze de 
+date, fiind la latitudinea utilizatorului. In paragrafele urmatoare se vor detalia caracteristicile cheie ale ale framework-ului Flask.
+
+Figura \ref{fig:FlaskProjectStructure} prezinta structura unui proiect Python utilizand framework-ul Flask.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.75]{figs/FlaskProjectStructure.png}
+    \caption{Structura unui proiect Python utilizand Flask}
+    \label{fig:FlaskProjectStructure}
+\end{figure}
+
+Structura de proiect prezentata in figura \ref{fig:FlaskProjectStructure} este detaliata in cele ce urmeaza:
+\begin{enumerate}
+	\item Fisierul flasky.py contine apelul prin care obiectul Flask este pornit, metoda run(). Aceasta metoda primeste ca parametrii adresa si 
+    portul prin care serverul poate fi accesat. Este punctul principal, sau punctul de intrare in aplicatie si reprezinta o bucla infinita 
+    in care sunt deservite cererile de la client.
+	\item Fisierul requirements.txt contine numele bibliotecilor utilizate in proiect si versiunile acestora. Este un fisier foarte util atunci 
+	cand o persoana preia proiectul pe o masina diferita si are nevoie sa creeze un mediu de lucru. Continutul acestui fisier poate fi usor generat 
+    de comanda "pip freeze".
+    \item Directorul venv/ contine toate bibliotecile instalate, cele continute in fisierul requirements.txt, si o referinta catre versiunea de python 
+    utilizata. Astfel se creeaza un mediu de lucru separat fata de ceea ce este instalat global pe computer sau de alte proiecte. Acest director 
+    trebuie creeat in faza de initiere a proiectului si atunci cand este preluat pe o alta masina de lucru.
+    \item Directorul app contine fisierele aplicatiei, toate fisierele necesare ca aplicatia sa ruleze. Directoarele pentru testare si migrari sunt 
+    separate.
+    \item Fisierul view.py contine partea de rutare a cerintelor primite de la client catre resurse prin decoratori sau prin metode statice si 
+    partea de formatare a raspunsului in structura asteptata de client. Acest fisier poate fi impartit in doua modula separate, routes.py si 
+    view.py, fiecare avand o sarcina bine definita.
+    \item Fisierul \_\_init\_\_.py din directorul app contine instantierea clasei Flask. Acest obiect se ocupa de toate cererile care vin de la client. 
+    Pe langa instantiere mai poate contine metode de initializare a diferite module sau biblioteci pe care aplicatia le utilizeaza, cum ar fi conexiunea 
+    la baza de date sau un sistem de versionare. Orice director care contine acest fisier este considerat un packet reutilizabil care poate fi inclus si 
+    utilizat intr-o alta aplicatie. Atunci can directorul app este inclus in aplicatie, continutul fisierului \_\_init\_\_.py este prima portine de 
+    cod care se ruleaza din acel pachet. 
+\end{enumerate}
+
+Decoratorii in python reprezinta o metoda prin care se seteaza o portiune de cod care sa fie executata atunci cand anumite evenimente au loc. De exemplu, 
+la primirea unei cereri de la client decoratorul spune care portiune de cod, metoda, trebuie executata. In general aceasta metoda poarta denumirea de 
+Handler. Decoratorii de tip route fac legatura intre adresa URL primita de la client si metodele resursei indentificata unic de adresa URL. Modul in  
+care aceasta legatura este realizata de Flask, este prin creearea unei mapari a adreselor URL pe resurse.
+
+Argumentele dinamice in adresa URL sunt adrese URL de baza care identifica o resursa, dar care au in plus un argument ce poate lua orice valoare. Acest 
+argument este preluat de catre resursa si pe baza lui raspunsul care s-ar fi trimis in mod normal este personalizat generand un raspuns diferit.
+
+Flask ofera un serviciu numit Request Hooks care ofera posibilitatea de a executa portiuni de cod inainte ca fiecare cerere de la client sa fie procesata, 
+inainte doar de prima cerere de la client sau dupa ce cererea a fost procesata. Acest serviciu este util pentru cazurile in care se doreste realizarea 
+conexiunii la baza de date sau autentificarea clientului de fiecare data cand o cerere este receptionata. Avantajul utilizarii acestui serviciu este 
+cantitatea redusa de cod duplicat. Il loc sa se realizeze autentificarea in fiecare rutina specifica unei resurse, se realizeaza in mod generic inainte ca 
+resursa sa fie accesata.
+
+Cazurile de eroare, in Flask, pot fi personalizate. La primirea unei cereri de la client, daca aceasta este eronata, se poate transmite ca raspuns, pe langa 
+codul de eroare, o pagina HTML sau un text care sa explice de ce a fost respinsa cererea.
+
+Unele framework-uri din Python contin setul de instructiuni pentru integrara cu Flask, dar, dupa cum am prezentat si mai sus, Flask a fost creat pentru a fi 
+integrat cu module externe, deci instructiunile necesare pentru integrarea cu acesta pot fi scrise de utilizator. Un exemplu de framework pentru baze de date 
+care este integrat cu Flask este Flask-SQLAlchemy.
+
+Micro-framework-ul Flask are un grad de flexibilitate foarte inalt comparat cu un full-framework. Flask a fost creat pentru a automatiza doar functionalitatile 
+de baza necesare unei apicatii web, ceea ce inseamna ca nu are integrate componente pentru autentificare sau operatii pe baze de date, dar este 
+compatibil cu componente externe. Acest lucru ofera posibilitatea de a utiliza framework-ul impreuna cu orice fel de baza de date sau orice tip de 
+autentificare. Pe cealalta parte, un framework full, ca Django, ofera o gama de componente care pot fi utilizate pentru functionalitati precum 
+operatiile pe baze de date si autentificare, deci utilizatorul este restrans in ceea ce priveste functionalitatile proiectului lui.
+
+\subsection{Retrofit framework}\label{sec:retrofit}
+Retrofit este o biblioteca scrisa in limbajul de programare Java care are scopul de a simplifica tranzactionarea cu un server RESTful. Intr-o arhitetura 
+client-server aceasta biblioteca este implementata in partea clientului si este o interfata API care respecta constrangerile arhitecturii REST.
 
 
 
-\subsection{Retrofit}\label{sec:retrofit}
 \section{IoT}\label{sec:iot}
 \section{Distributed System}\label{sec:distributed}
 \section{Zynq or Microprocessor architecture}\label{sec:zynq}
