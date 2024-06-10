@@ -283,6 +283,9 @@ cazul in care serverul returneaza un format de date care nu este suportat, prin 
 manuala a instructiunilor necesare convertirii raspunsului de la server in obiect Java. Acest lucru nu trebuie facut petru fiecare resursa in parte, ci 
 in mod general, o singura data.
 
+GSON este o biblioteca in Java care are rolul de a serializa un obiect Java intr-un format JSON, respectiv de a deserializa un obbiect in format JSON intr-un 
+obiect java.   
+
 Clasa Call suporta executarea cererii HTTP in mod sincron sau asincron. Este de preferat modul asincron, deoarece executia are loc pe un fir separat lasand 
 firu de executie creator sa execute alte sarcini. Aceasta clasa este dedicata pentru fiecare tranzactie, o instanta a acesteia poate fi utilizata pentru 
 o singura transmisie a unei cereri HTTP si receptie a unui raspuns HTTP. La finalul unei tranzactii obiectul este distrus.
