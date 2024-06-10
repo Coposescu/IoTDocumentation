@@ -229,7 +229,63 @@ operatiile pe baze de date si autentificare, deci utilizatorul este restrans in 
 
 \subsection{Retrofit framework}\label{sec:retrofit}
 Retrofit este o biblioteca scrisa in limbajul de programare Java care are scopul de a simplifica tranzactionarea cu un server RESTful. Intr-o arhitetura 
-client-server aceasta biblioteca este implementata in partea clientului si este o interfata API care respecta constrangerile arhitecturii REST.
+client-server aceasta biblioteca este implementata in partea clientului si este o interfata API care respecta constrangerile arhitecturii REST. Este o 
+biblioteca utilizata cu preponderenta in aplicatiile pentru sistemul de operare Android. In urmatoarele paragrafe sunt descrise caracteristicile cheie 
+ale acestei biblioteci.
+
+Aceasta biblioteca nu are implementat propriul mechanism petru tranzactionarea pachetelor HTTP, ci este integrata cu biblioteca OkHTTP. Aceasta din 
+urma este o biblioteca complexa care implementeaza protocolul HTTP si toate mecanismele necesare de mitigare si rezolvare a erorilor in tranzactionarea 
+prin retea. Are scopul de a automatiza complexitatea tranzactionarii prin retea pentru a usura utilizatorul de aceasta sarcina.
+ 
+Biblioteca Retrofit este construita peste OkHTTP si rolul ei este de a automatiza parsarea si formatarea cererilor si raspunsurilor HTTP. Aceasta creeaza 
+adresa URL si o trimite bibliotecii OkHTTP de unde este trimisa in retea. La primirea raspunsului, OkHTTP il trimite catre Retrofit care se ocupa de formatarea 
+lui pentru a-l prezenta utilizatorului sub structura dorita, de exemplu, un obiect.
+
+Figura \ref{fig:RetrofitStructure} prezinta functionalitatea bibliotecii retrofit. Aceasta va fi detaliata in paragrafele urmatoare.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.55]{figs/RetrofitStructure.png}
+    \caption{Structura bibliotecii Retrofit}
+    \label{fig:RetrofitStructure}
+\end{figure}
+
+Modulul Android Activity reprezinta interfata cu utilizatorul in sistemul de operare android. In urma unui eveniment, de exemplu, apasare buton sau 
+o rutina periodica, se trimite o cerere catre modulul API, care la finalul tranzactiei va returna informatia care va fi afisata utilizatorului.
+
+Modulul API contine mai multe modele si o interfata. In interfata sunt declarate metodele utilizate pentru a obine date de la server, de exemplu, metoda 
+GetAllClients care va informa serverul sa puna in raspuns o lista cu toti clientii din baza de date. Utilizand adnotari aceste metode sunt mapate pe adrese URL. 
+Metode returneaza un model, acesta fiind o clasa care contine toate campurile primite de la server in raspuns. De exemplu, campurile nume, adresa, 
+varsta. La construirea obiectului Retrofit se realizeaza maparea dintre adresa URL, metode, si modele. API trimite catre modulul RESTAdapter un obiect 
+al clasei Call. Acest obiect este initializat cu metoda care se doreste a fi executata utilizand obiectul Retrofit. Acesteia i se mai ataseaza 
+doua rutine, una care este executata in cazul in care tranzactia a fost efectuata cu success si una care se executa in caz 
+contrar.
+
+Modulul RESTAdapter primeste de la modulul API obiectul de tip Call care contine toate informatiile necesare pentru a executa cererea catre server. Obiectul Call 
+este transpus in format OkHTPP si trimis catre modulul OkHTTP. La finalul tranzactiei acesta primeste un raspuns de tipul OkHTTP pe care il mapeaza, 
+pe baza informatiilor din obiectul retrofit, intr-un obiect al clasei model specifice. Acest obiect este returnat modulului API.
+
+Modulul OkHTTP se ocupa de tranzactionarea efectiva prin retea. Primeste si returneaza obiecte specifice acestei biblioteci.
+
+Fiecare metoda din Retrofit este identifica unic de o adresa URL si identifica unic un set de date cerut de la un server. Fiecare set de date este 
+reprezentat printr-o clasa model. Acest lucru face posibila maparea dintre URL, metoda si model. Metodele sunt mapate la adrese URL prin adnotari. 
+In aceste adnotari se specifica metoda HTTP si adresa URL. Cele mai utilizate adnotari sunt prezentate mai jos:
+\begin{enumerate}
+	\item @Path - aceasta adnotare permite utilizarea de campuri variabile in adresa URL. Aceasta adnotare este un parametru al functiei, iar valoarea 
+	pe care o primeste la apelul metodei este pusa in adresa URL.
+    \item @Body - aceasta adnotare permite inserarea in adresa URL a unei clase model. Aceasta adnotare se utilizeaza la metodele HTTP de salvare 
+    in baza de date, cum ar fi metoda POST.
+    \item @FormUrlEncoded - aceasta adnotare permite inserarea in adresa URL a unor campuri dintr-un model cu scopul de a-l modifica in baza de date.
+\end{enumerate}
+
+Metodele in Retrofit sunt doar declarate intr-o interfata, nu si implementate, iar instructiunile necesare pentru a converti o cerere HTTP intr-o clasa java 
+sunt generate automat de catre acesta. Retrofit suporta conversia automata a multor tipuri de format a datelor, cum ar fi GSON sau SimpleXML, dar acopera si 
+cazul in care serverul returneaza un format de date care nu este suportat, prin crearea unui convertor particular. Acest lucru presupune scrierea 
+manuala a instructiunilor necesare convertirii raspunsului de la server in obiect Java. Acest lucru nu trebuie facut petru fiecare resursa in parte, ci 
+in mod general, o singura data.
+
+Clasa Call suporta executarea cererii HTTP in mod sincron sau asincron. Este de preferat modul asincron, deoarece executia are loc pe un fir separat lasand 
+firu de executie creator sa execute alte sarcini. Aceasta clasa este dedicata pentru fiecare tranzactie, o instanta a acesteia poate fi utilizata pentru 
+o singura transmisie a unei cereri HTTP si receptie a unui raspuns HTTP. La finalul unei tranzactii obiectul este distrus.
 
 
 
