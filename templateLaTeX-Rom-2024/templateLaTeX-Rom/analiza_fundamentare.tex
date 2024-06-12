@@ -3,19 +3,49 @@
 \pagestyle{fancy}
 
 \section{Protocoale de comunicatie}\label{sec:protocols}
-\subsection{protocolul TCP/IP}\label{subsec:tcpip}
+\subsection{TCP/IP}\label{subsec:tcpip}
 TCP/IP este stiva de comunicatie, un protocol, care sta la baza internetului si la baza interconectivitatii dispozitivelor. Majoritatea dispozitivelor 
 care suporta conexiunea la interent, de exemplu, telefoane, calculatoare personale etc, gestioneaza aceasta stiva de comunicatie. Implementeaza o arhitectura 
-pe 5 nivele unde fiecare nivel reprezinta un alt protocol de comunicatie. 
+pe 5 nivele unde fiecare nivel are un rol bine definit si este constient doar de nivelele care il inconjoara, nivelul superior si cel inferior lui. 
 
-Figura \ref{fig:TCPIP_Layers} prezinta 
-
+Figura \ref{fig:TCPIP_Layers} prezinta nivelele stivei de comunicatie TCP/IP in contextul a doua dispozitive conectate la un router.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{figs/TCPIP_Layers.png}
-    \caption{Arhitectura publica/aboneaza a protocolului MQTT [4]}
+    \caption{Stiva de comunicare TCP/IP [4]}
     \label{fig:TCPIP_Layers}
 \end{figure}
+
+Host A si Host B reprezinta doua dispozitive conectate la un router care implementeaza stiva TCP/IP. De exemplu, un calculator personal si un telefon.
+
+Nivelul aplicatiei, reprezentat in figura prin App X si App Y, contine protocoale de comunicatie de nivel inalt, cum ar fi protocolul HTTP, FTP, MQTT etc. 
+Acest nivel trimite catre nivelul TCP informatii precum, adresa ip si portul dispozitivului destinatie.
+
+Nivelul transport, reprezentat in figura prin TCP, Are rolul de a se asigura ca mesajele trimise de aplicatiile de la nivelul precedent ajung la destinatie 
+fara erori si in ordinea in care au fost trimise. De asemenea, la acest nivel se gestioneaza si porturile aplicatiilor. 
+
+Nivelul internet protocol, reprezentat in figura prin IP, se ocupa de transmisia datelor prin mai multe retele pana la destinatia finala. La acest nivel 
+mesajului i se ataseaza adresa IP a destinatiei primita de la nivelul TCP. Astfel mesajul poate fi transmis prin mai multe retele pana atinge dispozitivul 
+destinatie.
+
+Nivelul de acces retea, reprezentat in figura prin Network access protocol \#1, se ocupa de transmisia datelor catre urmatorul dispozitiv din sub-reteaua.
+lui. In cazul schemei, urmatorul dispozitiv din retea este router-ul. Nu este responsabil de destinatia finala a mesajului.
+
+Nivelul fizic, reprezentat in figura prin Physical, se ocupa de transformarea mesajului primit de la nivelul precedent in unde radio, in cazul 
+comunicatiei fara fir, sau in semnal electric sau luminos, in cazul comunicatiei pe fir si de transmisia acestuia prin retea. 
+
+Routerul, reprezentat in figura prin Router J, implementeaza nivelele de jos ale stivei, IP, Network Access protocol, si Physical. Implementeaza doar aceste 
+trei nivele din stiva, deoarece rolul lui este de a crea o legatura intre doua retele. Un mesaj primit de la un dispozitiv din reteaua 1 va fi decodat pana 
+la nivelul IP, apoi recodificat cu urmatoarea destinatie si transmis.
+
+Fiecare nivel adauga la mesajul original trimis de nivelul aplicatiei un antet si in unele cazuri si un subsol. Subsolul reprezinta un cod de verificare a 
+erorilor, cum ar fi CRC, iar antetul reprezinta informatii specifice rolului nivelului de care este adaugat. La raceptia unui mesaj calea acestuia este inversa, 
+de la nivelul Physical catre nivelul Application.
+
+Termenul Socket reprezinta o pereche (Host, Port) care identifica unic un dispozitiv in tot internetul. Perechea (Host, Port) este formata din adresa globala
+a unui dispozitiv si portul pe care acesta comunica. De exemplu, la crearea unei conexiuni intre doua dispozitive, initiatorul conexiunii trebuie sa cunoasca si 
+sa adauge in mesajul trimis adresa globala in internet a dispozitivului destinatie si portul pe care acesta asculta. Socket-ul este utilizat la crearea unei 
+conexiuni intre doua aplicatii.
 
 \subsection{HTTP}\label{sec:http}
 Protocolul de comunicatie HTTP reprezinta standardul pentru comunicarea documentelor prin internet. Acesta este utilizat cu preponderenta pentru obinerea paginilor 
@@ -170,6 +200,7 @@ publicare. Salvarea energiei aduce cu sine cresterea numarului de mesaje intersc
 a bateriei. 
 
 \subsection{Wi-Fi}\label{sec:wifi}
+
 \subsection{SPI}\label{sec:spi}
 \subsection{I2C}\label{sec:i2c}
 \section{Modele abstracte}\label{sec:modele}
