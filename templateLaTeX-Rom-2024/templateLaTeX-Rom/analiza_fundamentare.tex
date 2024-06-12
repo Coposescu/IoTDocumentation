@@ -4,6 +4,19 @@
 
 \section{Protocoale de comunicatie}\label{sec:protocols}
 \subsection{protocolul TCP/IP}\label{subsec:tcpip}
+TCP/IP este stiva de comunicatie, un protocol, care sta la baza internetului si la baza interconectivitatii dispozitivelor. Majoritatea dispozitivelor 
+care suporta conexiunea la interent, de exemplu, telefoane, calculatoare personale etc, gestioneaza aceasta stiva de comunicatie. Implementeaza o arhitectura 
+pe 5 nivele unde fiecare nivel reprezinta un alt protocol de comunicatie. 
+
+Figura \ref{fig:TCPIP_Layers} prezinta 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{figs/TCPIP_Layers.png}
+    \caption{Arhitectura publica/aboneaza a protocolului MQTT [4]}
+    \label{fig:TCPIP_Layers}
+\end{figure}
+
 \subsection{HTTP}\label{sec:http}
 Protocolul de comunicatie HTTP reprezinta standardul pentru comunicarea documentelor prin internet. Acesta este utilizat cu preponderenta pentru obinerea paginilor 
 web de la un server web. Este un model de comunicatie client-server, unu la unu, care defineste cum sunt formatate informatiile si trimise de catre client si 
@@ -17,35 +30,56 @@ de exemplu, MQTT, unde se trimit date catre server fara a se astepta un raspuns 
 HTTP este utilizat pentru tranzactionarile de date mari, neavand o limita superioara de dimensiune a pachetului. Totusi dimensiunile utilizate in mod 
 uzual sun relativ mici din cauza timpului de raspuns care creste odata cu dimensiunea resursei.
 
+In stiva de comunicare a protocolului TCP/IP, HTTP se afla in nivelul cel mai inatlt, si anume, nivelul aplicatiei. Acest lucru inseamna ca HTTP nu se 
+ocupa de transportul efectiv al mesajelor printr-o retea, ci doar defineste un limbaj comun pentru arhitectura de comunicatie client-server.  
+
 Antetul unui mesaj este bazat pe text, insemnand ca particularitatile mesajelor sunt reprezentate prin cuvinte intuitive spre deosebire de MQTT unde 
-particularitatile sunt reprezentate prin biti sau set de biti. Mai jos sunt prezentate cele mai 
-uzuale astfel de proprietati:
+particularitatile sunt reprezentate prin biti sau set de biti. Mai jos sunt prezentate cele mai uzuale astfel de proprietati:
 \begin{itemize}
 	\item Content-Type - specifica in ce format sunt codate datele cuprinse in corpul mesajului. Valoarea acestuia poate fi JSON, XML etc.
 	\item Content-Length - specifica dimensiunea corpului mesajului. Cum s-a precizat si mai sus, nu exista o valoare maxima petru acest camp, dar 
 	in mod uzual nu depaseste 256MB.
     \item Accept - formate ale datelor care sunt acceptate de catre client ca raspuns. De exemplu, un client poate cere unui server un set de imagini si 
     prin acest camp informeaza server-ul sa-i ofere doar imagini in format jpeg.
+    \item User-Agent - utilizat de client pentru a specifica informtii despre el insusi, de exemplu, tipul aplicatiei, versiunea etc.
+    \item Connection - poate lua doua valori, "keep-alive" si "close". Este utilizat de client pentru a specifica daca doreste sa fie incheiata conexiunea 
+    dupa returnarea raspunsului. "keep-alive" va informa serverul ca actuala conexiune va ramane deschisa pentru un nou request, iar "close" il va 
+    informa ca va fi incheata conexiunea.
 \end{itemize}
 
-Metodele definite de protocolul HTTP sunt prezentate in enumerarea urmatoare. O metoda reprezinta o actiune pe care un client o trimite unui server pentru 
-a fi executata.
+\
+
+O metoda HTTP reprezinta o actiune pe care un client o trimite unui server pentru a fi executata. Cele mai comune metode HTTP sunt:
 \begin{itemize}
-	\item GET - 
-	\item POST -
-	\item PUT - 
-	\item DELETE - 
-	\item HEAD - 
-	\item OPTIONS - 
-	\item PATCH - 
+	\item GET - prin aceasta metoda clientul cere o resursa server-ului
+	\item POST - prin aceasta metoda clientul trimite un set de date catre server pentru a modifica o resursa sau pentru a salva o resursa noua. Daca 
+	adresa URL contine o resursa care nu exista deja, cererea va returna codul de eroare 404.
+	\item PUT -  prin aceasta metoda clientul trimite un set de date catre server pentru a suprascrie o resursa sau pentru a crea o resursa noua. Daca 
+    este trimis un URL cu o resursa care nu exista, aceasta va fi creata.
+	\item DELETE - prin aceasta metoda clientul sterge o resursa de pe server.
 \end{itemize}
 
-O adresa URL este compusa din trei parti principale. Acestea sunt enumerate mai jos:
+\
+
+O adresa URL este compusa din trei parti principale:
 \begin{itemize}
-	\item Protocolul utilizat pentru extragerea resursei. De exemplu, http.
+	\item Protocolul utilizat pentru extragerea resursei. In general acesta este HTTP si este de forma "http://".
 	\item Adresa serverului sau locatia serverului. De exempu, www.universitatea\_tehnica.ro.
-	\item Identificatorul unic al resursei. De exemplu, clientID/1. 
+	\item Identificatorul unic al resursei. De exemplu, /clientID/1 sau /index.html.
 \end{itemize}
+
+\
+
+Codul de status este un cod returnat de server in raspuns care instiinteaza clientul de statusul executiei cererii. Sunt foarte multe coduri de eroare 
+impartite pe categorii de erori, fiecare reprezentand o eroare diferita. Mai jos sunt enumerate cele mai utilizate coduri de eroare:
+\begin{itemize}
+	\item 200 - Success. Serverul instiinteaza clientul ca actiunea a fost executata cu success.
+	\item 400 - Bad Request. Serverul nu accepta cererea clientului, deoarece aceasta este eronata. 
+	\item 403 - Forbidden. Este trimisa de server atunci cand clientul nu are autoritatea sa acceseze o anumita resursa.
+	\item 404 - Not found. Resursa ceruta de client nu poate fi gasita. 
+\end{itemize}
+
+\
 
 \subsection{MQTT}\label{sec:mqtt}
 Standardul MQTT defineste un set de reguli, un limbaj, pe care doua sau mai multe entitati trebuie sa il respecte pentru a putea schimba mesaje intre 
