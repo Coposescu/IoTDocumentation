@@ -4,9 +4,10 @@
 
 \section{Protocoale de comunicatie}\label{sec:protocols}
 \subsection{TCP/IP}\label{subsec:tcpip}
-TCP/IP este stiva de comunicatie, un protocol, care sta la baza internetului si la baza interconectivitatii dispozitivelor. Majoritatea dispozitivelor 
+TCP/IP este o stiva de comunicatie, un protocol, care sta la baza internetului si a interconectivitatii dispozitivelor. Majoritatea dispozitivelor 
 care suporta conexiunea la interent, de exemplu, telefoane, calculatoare personale etc, gestioneaza aceasta stiva de comunicatie. Implementeaza o arhitectura 
-pe 5 nivele unde fiecare nivel are un rol bine definit si este constient doar de nivelele care il inconjoara, nivelul superior si cel inferior lui. 
+pe 5 nivele unde fiecare nivel poate implementa diferite protocoale specifice si este constient doar de nivelele care il inconjoara, nivelul superior 
+si cel inferior lui. 
 
 Figura \ref{fig:TCPIP_Layers} prezinta nivelele stivei de comunicatie TCP/IP in contextul a doua dispozitive conectate la un router.
 \begin{figure}[H]
@@ -200,8 +201,51 @@ publicare. Salvarea energiei aduce cu sine cresterea numarului de mesaje intersc
 a bateriei. 
 
 \subsection{Wi-Fi}\label{sec:wifi}
+Wi-Fi reprezinta un set de protocoale de comunicatie fara fir bazate pe standardul IEEE 802.11. In stiva TCP/IP acesta este implementat in ultimele 2 nivele, 
+Network Addressing (MAC) si Physical. Acesta permite crearea unei retele locale de dispozitive interconectate fara cabluri fizice.
+
+O retea Wi-Fi uzuala este formata din doua tipuri de dispozitive, statii de baza si statii client. Statiile de baza reprezinta punctul central al unei retele Wi-Fi 
+si gestioneaza conexiunea si distribuirea mesajelor intre statiile client connectate la aceasta. Statiile client nu pot comunica direct intre ele, ci prin 
+intermediul statiei de baza. Acest tip de retea este utilizat cu preponderenta pentru a oferi statiilor client conexiune la internet. Pentru acest lucru 
+statia de baza este connectata la un modem care la randul lui este conectat la reteaua furnizorului de internet.
+
+Un alt tip de retea Wi-Fi, mai putin utilizata, este reteaua punct la punct si este formata doar din statii client interconectate intre ele in mod direct. 
+Acest tip de retea utilizeaza un protocol numit Wi-Fi Direct si este utilizata pentru conexiuni si tranzactii de date intre doua statii client.
+
+Nivelul Physical are rolul de a codifica si decodifica semnalele digitale in semnale radio in benzile de frecventa 2.4GHz si 5GHz. Aceste benzi fac parte din 
+din benzile de frecventa ISM alocate pentru utilizarea in domeniile industrial, stiintific si medical. Petru codificarea si decodificarea datelor 
+sunt utilizate mai multe scheme de modulatie, din care, schema de modulatie OFDM este utilizata cu preponderenta. 
+
+Banda de frecventa 2.4GHz reprezinta intervarul de frecvente cuprins intre 2.4GHz si 2.5GHz. Acest interval de 100 MHz este impartit in 14 canale partial 
+suprapuse. Fiecare canal are o latime de banda de 22 MHz. Majoritatea dispozitivelor ofera utilizatorului posibilitatea de a schimba canalul de comunicatie 
+cu scopul imbunatatirii vitezei. O viteza mai buna este obtinuta prin scaderea interferentei dintre dispozitivele dintr-o retea, acest lucru fiind obtinut 
+prin imprastierea dispozitivelor pe cele 14 canale. 
+
+Figura \ref{fig:2400MHz_channels} prezinta modul in care banda de frecventa 2.4GHz este impartita in cele 14 canale. Fiecare canal are notat deasupra lui 
+numarul si centrul frecventei acestuia.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{figs/2400MHz_channels.png}
+    \caption{Canalele de comunicatie in banda de frecventa 2.4GHz [1 from npp]}
+    \label{fig:2400MHz_channels}
+\end{figure}
+
+Nivelul MAC are rolul de a gestiona si mentine comunicatia intre o statie client si o statie de baza dintr-o retea locala. Acesta este responsabil de 
+transmiterea pachetului de la statia client catre statia de baza, de retransmiterea pachetului in cazul in care acesta nu a fost receptionat de catre 
+statia de baza, de evitare a coliziunilor cu alte dispozitive din retea etc.
+
+Conexiunea dintre o statie client si o statie de baza se poate realiza in doua moduri, activ sau pasiv. In modul activ, statia client transmite pachete 
+care contin informatii despre capabilitatile lui, iar statiile de baza raspund la aceste pachete cu numele retelei si alte informatii legate de retea. 
+In modul pasiv, statia de baza transmite periodic pachete prin care isi anunta prezenta, iar statiile client intra in receptie pe fiecare canal cu scopul 
+de a receptiona un astfel de frame. Dupa acest prim pas, urmeaza un schimb de pachete prin care se realizeaza conexiunea dintre statia client si statia de baza.
+
+Acest protocol, in comparatie cu un protocol pe fir, faciliteaza instalarea unei retele locale prin inlaturarea necesitatii cablurilor si a rutarii acestora 
+si mobilitatea dispozitivelor din retea fiind permisa deplasarea dispozitivelor in raza de acoperire a statiei de baza. De asemenea, principalele dezavantaje 
+ale acestuia sunt interferenta dintre dispozitivele din retea si raza de acoperire a statiei de baza.
 
 \subsection{SPI}\label{sec:spi}
+
+
 \subsection{I2C}\label{sec:i2c}
 \section{Modele abstracte}\label{sec:modele}
 \subsection{RESTful API}\label{sec:restapi}
