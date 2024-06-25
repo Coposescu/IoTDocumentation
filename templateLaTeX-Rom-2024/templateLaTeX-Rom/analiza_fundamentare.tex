@@ -244,9 +244,100 @@ si mobilitatea dispozitivelor din retea fiind permisa deplasarea dispozitivelor 
 ale acestuia sunt interferenta dintre dispozitivele din retea si raza de acoperire a statiei de baza.
 
 \subsection{SPI}\label{sec:spi}
+SPI, Serial Peripheral Interface, este un protocol de comunicatie seriala si sincrona. Arhitectura acestuia este formata din dispozitive care pot avea 2 
+roluri, master sau slave. Intr-o arhitectura SPI poate exista un singur dispozitiv master si unul sau mai multe dispozitive slave. Acest protocol a fost 
+proiectat pentru communicatia dintre un microcontroller, dispozitivul master, si perifericele acestuia, dispozitivele slave. 
 
+Liniile de semnal utilizate in protocolul SPI sunt:
+\begin{itemize}
+    \item SS (Slave Select) este un semnal controlat de dispozitivul master prin care activeaza dispozitivul slave pentru o transmisie de date.
+    \item SCLK (Serial Clock) este un semnal generat de dispozitivul master pentru sincronizarea cu dispozitivul slave in timpul unei transmisii de date.
+    \item MOSI (Master Out Slave In) este semnalul de date prin care dispozitivul master transmite date dispozitivului slave. Aceasta linie de semnal 
+    poate sa lipseasca in anumite moduri de comunicatie.
+    \item MISO (Master In Salve Out) este semnalul de date prin care dispozitivul slave transmite date dispozitivului master. Aceasta linie de semnal 
+    poate sa lipseasca in anumite moduri de comunicatie.
+\end{itemize}
+
+\
+
+Comunucatia dintre doua dispozitive, master si slave, se poate realizeaza prin 3 sau 4 linii de semnal. Modul de communicatie cu 3 linii de semnal se poate 
+numi Simplex sau Half-Duplex, iar cel cu 4 linii de semnal Full-Duplex:
+\begin{itemize}
+    \item Simplex reprezinta modul de comunicatie in care doar dispozitivul master poate transmite date catre unul sau mai multe dispozitive slave. Liniile 
+    de semnal utilizate sunt SS, SCLK si MOSI.
+    \item Half-Duplex reprezinta modul de comunicatie in care este utilizata o singura linie de date, comuna intre un dispozitiv master si unul sau mai multe 
+    dispozitive slave, pentru transmisia de date de la master catre slave sau de la slave catre master. Un singur dispozitiv poate transmite la un moment dat. 
+    Liniile de semnal utilizate sunt SS, SCLK si MOSI/MISO.
+    \item Full-Duplex reprezinta modul de comunicatie cel mai utilizat. Acesta utilizeaza 2 linii de date pentru tranzactionarea intre un dispozitiv master 
+    si unul sau mai multe dispozitive slave. O linie este utilizata pentru transmisia de date de la master catre slave si una pentru transmisia datelor de 
+    la slave catre master. Dispozitivela master si slave pot transmite date simultan. Liniile de semnal utilizate sunt SS, SCLK, MOSI si MISO.    
+\end{itemize}
+
+Figura \ref{fig:SPIMasterSlave} prezinta modul de comunicatie Full-Duplex al protocolului SPI dintre un dispozitiv master si doua dispozitive Slave.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{figs/SPIMasterSlave.png}
+    \caption{Arhitectura protocolului SPI Full-Duplex}
+    \label{fig:SPIMasterSlave}
+\end{figure}
+
+Intr-o arhitectura SPI in care exista mai multe dispozitive slave, dispozitivul master are o line de semnal SS specifica fiecarui dispozitiv slave, iar liniile 
+de semnal SCK, MOSI si MISO sunt comune. Astfel, atunci cand dispozitivul master initiaza o tranzactie cu un dispozitiv slave, activeaza linia de semnal SS 
+legata la acel slave, celelalte dispozitive slave ramanand inactive.
+
+Un alt mod, mai putin utilizat, in care liniile de semnal pot fi legate intre un dispozitiv master si mai multe dispozitive slave este prin inlantuirea 
+dispozitivelor slave. Astfel, dispozitivul master are o singura linie de semnal SS comuna pentru toate dispozitivele slave, linia de semnal MOSI este legata 
+la primul dispozitiv slave din lant, iar linia MISO este legta la ultimul dispozitiv slave din lant. La initierea unei tranzactii, dispozitivul master activeaza 
+toate dispozitivele slave, transmite date catre primul dispozitiv slave din lant, iar fiecare slave din lant redirectioneaza datele catre urmatorul. Atunci cand 
+datele transmise de master ajung la dispozitivul slave cu care se doreste comunicarea, acesta proceseaza datele si redirectioneaza un mesaj nou catre urmatorul 
+slave. Acest mod de comunicare este utilizat doar in cazul in care nu este posibila rutarea unui semnal SS catre fiecare dispozitiv slave.
+
+Protocolul SPI permite gestionarea polaritatii si a fazei semnalului de ceas pentru prelevarea datelor. Dispozitivul master este responsabil de utilizarea 
+polaritatii si a fazei suportate de dispozitivul slave. Tabelul \ref{tab:spiPolPhase} prezinta cele 4 moduri in care datele pot fi prelevate.
+\begin{table}[ht]
+    \caption{Polaritateaa si faza semnalului de ceas}
+    \centering   % tabel centrat
+    \renewcommand{\arraystretch}{2.2}
+    \begin{tabular}{|c|c|c|}          % 4 coloane centrate
+        \hline
+        Polaritate & Faza & Descriere \\ [0.5ex]   % inserare tabel
+        %heading
+        \hline                          % linie orizontal simpla
+        0 & 0 & \parbox{280pt}{SCLK are valoarea 0 logic cand este inactiva, iar datele sunt prelevate pe frontul crescator}\\ 
+        0 & 1 & \parbox{280pt}{SCLK are valoarea 0 logic cand este inactiva, iar datele sunt prelevate pe frontul descrescator}\\ 
+        1 & 0 & \parbox{280pt}{SCLK are valoarea 1 logic cand este inactiva, iar datele sunt prelevate pe frontul descrescator}\\ 
+        1 & 1 & \parbox{280pt}{SCLK are valoarea 1 logic cand este inactiva, iar datele sunt prelevate pe frontul crescator}\\ 
+        \hline
+    \end{tabular}
+    % titlul tabelului
+    \label{tab:spiPolPhase}                % eticheta folosita pentru referirea tabelului in text; referirea in text se va face cu \ref{table:nonlin}
+\end{table}
+
+Figura \ref{fig:SPITimingDiagram} prezinta in detaliu modul in care sunt tranzactionate date intre un dispozitiv master si unul slave. Este prezentat modul de 
+comunicatie Full-Duplex cu semnalul de ceas avand caracteristicile de polaritate si faza 0 si 0, adica semnalul SCLK are valoare 0 in modul inactiv, iar datele 
+sunt prelevate pe frontul crescator.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.75]{figs/SPITimingDiagram.png}
+    \caption{Diagrama de timp a comunicatiei SPI}
+    \label{fig:SPITimingDiagram}
+\end{figure}
+
+Datele sunt transmise intre un dispozitiv master si unul slave bit cu bit. Dispozitivul master activeaza linia SS prin tranzitia din 1 logic in 0 logic, 
+apoi seteaza linia MOSI in conformitate cu primul bit din secventa de biti care urmeaza a fi tranzactionata si genereaza semnalul de ceas. Dupa ce ultimul 
+bit a fost transmis, dispozitivul master mentine semnalul de ceas in 1 logic sau in 0 logic in functie de setarea polaritatii, iar apoi dezactiveaza linia 
+SS prin tranzitia din 0 logic in 1 logic. De exemplu, in cazul in care semnalul de ceas are caracteristicile de polaritate si faza 0 si 0, pe frontul 
+crescator al semnalului de ceas dispozitivul slave citeste starea liniei de semnal MOSI, 1 logic sau 0 logic, iar pe frontul descrescator dispozitivul master 
+schimba sau mentine starea liniei conform cu urmatorul bit care urmeaza a fi transmis. In acelasi timp, dispozitivul slave poate tranzitiona linia de date MISO 
+in conformitate cu secventa de biti pe care acesta doreste sa o trimita dispozitivului master.
+
+Viteaza de transmisie a acestui protocol este foarte mare in comparatie cu alte protocoale de comunicatie asemanatoare, cum ar fi I2C. Nu ofera un mechanism 
+de verificare a erorilor sau de instiintare ca datele au fost receptionate cu success de cealalta parte. Aceste doua dezavantaje pot fi intampinate prin 
+utilizarea unui algoritm de verificare a integritatii datelor si a unui mecanism de tip cerere raspuns.
 
 \subsection{I2C}\label{sec:i2c}
+
+
 \section{Modele abstracte}\label{sec:modele}
 \subsection{RESTful API}\label{sec:restapi}
 RESTful semnifica Representational State Transfer Application Programmin Interface si reprezinta un set de reguli care trebuie respectate in construirea 
