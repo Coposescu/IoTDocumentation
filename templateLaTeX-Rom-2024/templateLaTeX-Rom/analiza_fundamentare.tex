@@ -336,7 +336,73 @@ de verificare a erorilor sau de instiintare ca datele au fost receptionate cu su
 utilizarea unui algoritm de verificare a integritatii datelor si a unui mecanism de tip cerere raspuns.
 
 \subsection{I2C}\label{sec:i2c}
+I2C este un protocol de comunicatie seriala creat pentru comunicatia dintre un microcontroler si unul sau mai multe periferice ale acestuia. Este un 
+protocol sincron, are o arhitectura de tip master slave si necesita doar doua linii de semnal pentru tranzactionarea de date. 
 
+Acest protocol identifica fiecare dispozitiv conectat la magistrala printr-o adresa unica, spre deosebire de alte protocoale precum SPI care necesita cate o 
+linie de semnal pentru fiecare dispozitiv sau o inlantuire a dispozitivelor. De asemenea, utilizeaza doar 2 linii de semnal indiferent de numarul de dispozitive 
+conectate la magistrala.
+
+Liniile de semnal utilizate sunt numite SDA si SCL, linia de date si respectiv linia de ceas. Acestea sunt bidirectionale, insemnand ca ambele dispozitive 
+care participa intr-o tranzactie au control asupra lor. Semnalul de ceas este generat de dispozitivul master, dar dispozitivul slave are capacitatea de a 
+forta linia in stare inactiva in cazul in care nu este pregatit pentru a receptiona sau transmite date. De exemplu, dispozitivul slave nu a terminat de 
+procesat o sarcina si forteaza linia de ceas in stare inactiva pentru a anunta dispozitivul master sa nu trimita urmatoarele date. Cand sarcina este finalizata, 
+dispozitivul slave elibereaza linia de ceas, iar tranzactia datelor isi reia cursul.
+
+Ofera capabilitatea mai multor dispozitive master conectate la aceeasi magistrala. Doar un dispozitiv master poate controla magistrala la un moment dat. 
+Decizia de control este luata prin verificarea liniilor magistralei, daca acestea sunt inactive, au valoarea 1 logic, magistrala este libera pentru un transfer,
+iar daca acestea sunt ocupate inseamna ca exista o tranzactie in curs de procesare initiata de un alt dispozitiv master de pe magistrala. Pentru a detecta 
+corect daca magistrala este libera sau nu, verificarea liniilor trebuie efectuata pentru cel putin o perioada de ceas, deoarece liniile SCL si SDA pot avea 
+valoarea 1 logic simultan pentru o jumatate din perioada de ceas.
+
+Figura \ref{fig:I2CBus} prezinta un exemplu de magistrala I2C cu 6 dispozitive conectate. Microcontroller A si Microcontroller B reprezinta dispozitivele master, 
+iar celelalte reprezinta dispozitive slave, ecran LCD, convertor din semnal analogic in semnal digital etc.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.68]{figs/I2CBus.png}
+    \caption{Exemplu de magistrala I2C [3npp]}
+    \label{fig:I2CBus}
+\end{figure}
+
+Un transfer de date pe magistrala I2C este efectuat in mai multe etape, prima etapa dupa verificarea disponibilitatii magistralei este transmisia unei conditii 
+de start. Aceasta conditie este reprezentata de tranzitia din 1 logic in 0 logic a liniei SDA in timp ce linia SCL este in 1 logic si informeaza dispozitivele 
+legate la magistrala ca o noua tranzactie este initiata.
+
+A doua etapa este reprezentata de transmisia primului octet care contine adresa dispozitivului slave cu care se va efectua transferul de date pe primii 7 biti si 
+a bitului care indica o citire sau o scriere. Toate dispozitivele conectate la magistrala I2C vor receptiona acest octet si il vor compara cu adresa proprie. 
+Dispozitivul care este identificat de adresa transmisa va confirma receptia acesteia.
+
+Fiecare octet transmis de un dispozitiv este confirmat sau negat de catre dispozitivul care l-a receptionat. Dispozitivul master ofera un al 9-lea semnal de ceas 
+dispozitivului receptor pentru aceasta confirmare. In cazul receptionarii cu success, dispozitivul receptor va mentine linia de date SDA in 0 logic pentru cea de-a 
+9-a perioada de ceas (ACK), iar in cazul receptionarii eronate, acesta va mentine linia in 1 logic (NACK).
+
+A treia etapa este reprezentata de transmisia datelor octet cu octet. In cazul unei citiri, dispozitivul master va genera semnalul de ceas, iar dispozitivul slave 
+va pune primul octet de date pe linia SDA, urmand apoi al 9-lea puls de ceas prin care dispozitivul master va confirma receptia. In cazul unei scrieri, dispozitivul 
+master va genera semnalul de ceas si va pune primul octet de date pe linia SDA, iar dispozitivul slave va confirma receptia acestora.
+
+A patra etapa este transmisia conditiei de stop. Aceasta conditie este reprezentata prin tranzitia liniei de date din o logic in 1 logic  in timp ce linia 
+de ceas este in 1 logic. Aceasta conditie reprezinta finalul unei tranzactii intre un dispozitiv master si unul slave.
+
+Pentru cresterea numarului de dispozitive care pot fi conectate la o magistrala si pentru a evita coliziunea de adrese, protocolul I2C ofera capabilitatea 
+de a utiliza adrese pe 10 biti. Acest lucru inseamna ca adresarea se va face in primii doi octeti transmisi de dispozitivul master pe magistrala. Primul octet 
+contine biti de identificare a tipului de adresare si partea mai semnificativa din adresa, iar al doilea octet contine partea mai putin semnificativa a adresei.
+
+Figura \ref{fig:I2CCompleteDataTransfer} prezinta etapele unei tranzactionari de date intre un dispozitiv master si unul slave.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.75]{figs/I2CCompleteDataTransfer.png}
+    \caption{Exemplu de tranzactie I2C intre un dispozitiv master si unul slave [3npp]}
+    \label{fig:I2CCompleteDataTransfer}
+\end{figure}
+
+Pe durata unei transmisii, dispozitivul master sau cel slave poate in orice moment, chiar si in mijlocul transferului unui octet, sa forteze linia de ceas SCL in 
+0 logic pentru a opri temporar tranzactia de date. Un exemplu de moment in care un dispozitiv efectueaza aceasta operatie este cand in mijlocul unui transfer 
+de date acesta este intrerupt de o rutina interna sau de un alt periferic cu prioritate mai mare. In acest caz linia de ceas SCL va fi mentinuta in 0 logic pana 
+la finalizarea executiei rutinei mai prioritare, iar apoi executia transferului I2C va fi reluat. 
+
+Dezavantajele acestui protocol sunt viteza de maximum 3 MHz, mai mica decat cea a protocolulul SPI, si ofera doar modul Half-Duplex, un singur dispozitiv master 
+sau slave poate transmite sau receptiona la un moment dat. Are ca avataje capabilitatea de conectare a mai multor dispozitive la magistrala fara a creste numarul 
+de linii de semnal, bitul de confirmare al receptiei fiecarui pachet si capabilitatea de a avea mai multe dispozitive master conectate la aceeasi magistrala.
 
 \section{Modele abstracte}\label{sec:modele}
 \subsection{RESTful API}\label{sec:restapi}
@@ -532,13 +598,6 @@ Clasa Call suporta executarea cererii HTTP in mod sincron sau asincron. Este de 
 firu de executie creator sa execute alte sarcini. Aceasta clasa este dedicata pentru fiecare tranzactie, o instanta a acesteia poate fi utilizata pentru 
 o singura transmisie a unei cereri HTTP si receptie a unui raspuns HTTP. La finalul unei tranzactii obiectul este distrus.
 
-
-
-\section{IoT}\label{sec:iot}
-\section{Distributed System}\label{sec:distributed}
-\section{Zynq or Microprocessor architecture}\label{sec:zynq}
-\section{C embedded modularization}\label{sec:cembedded}
-\section{Data visualisation algorithms}\label{sec:graph}
 \section{Baza de date MongoDB}\label{sec:mongodb}
 MongoDB este o baza de date orientata pe documente fiind printre putinele baze de date diferita de cele uzuale care sunt relationale, adica stocheaza datele in tabele 
 grupate intre ele prin relatii. Aceasta baza de date stocheaza datele in colectii de documente, de aici si denumirea de baza de date orientata pe documente. 
