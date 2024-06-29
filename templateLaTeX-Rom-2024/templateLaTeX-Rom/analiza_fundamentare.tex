@@ -13,7 +13,7 @@ Figura \ref{fig:TCPIP_Layers} prezinta nivelele stivei de comunicatie TCP/IP in 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{figs/TCPIP_Layers.png}
-    \caption{Stiva de comunicare TCP/IP [4]}
+    \caption{Stiva de comunicare TCP/IP \cite{williamStallings}}
     \label{fig:TCPIP_Layers}
 \end{figure}
 
@@ -142,8 +142,8 @@ descris in paragrafele de mai sus.
     \label{fig:MQTTBrokerArchitecture}
 \end{figure}
 
-Subeictul mesajelor, denumit topic in standard [1], reprezinta o serie de cuvinte structurate pe nivele care descriu intr-un mod succint datele mesajului. 
-Aceste cuvinte sunt separate prin caracterul special "/", denumit si separator de nivel [1], si au rolul de a filtra mesajele trimise catre clienti. 
+Subeictul mesajelor, denumit topic in standard \cite{mqttstandard}, reprezinta o serie de cuvinte structurate pe nivele care descriu intr-un mod succint datele mesajului. 
+Aceste cuvinte sunt separate prin caracterul special "/", denumit si separator de nivel, si au rolul de a filtra mesajele trimise catre clienti. 
 De exemplu, Un senzor transmite un mesaj care contine date de temperatura catre Broker sub subiectul "IDsenzor/citiri/temperatura". 
 Broker-ul va redirectiona acest mesaj doar catre clientii care sunt abonati pentru receptia de mesaje care au subiectul "IDsenzor/citiri/temperatura".
 
@@ -226,7 +226,7 @@ numarul si centrul frecventei acestuia.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{figs/2400MHz_channels.png}
-    \caption{Canalele de comunicatie in banda de frecventa 2.4GHz [1 from npp]}
+    \caption{Canalele de comunicatie in banda de frecventa 2.4GHz \cite{wifichannels}}
     \label{fig:2400MHz_channels}
 \end{figure}
 
@@ -360,7 +360,7 @@ iar celelalte reprezinta dispozitive slave, ecran LCD, convertor din semnal anal
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.68]{figs/I2CBus.png}
-    \caption{Exemplu de magistrala I2C [3npp]}
+    \caption{Exemplu de magistrala I2C \cite{i2ctutorial}}
     \label{fig:I2CBus}
 \end{figure}
 
@@ -391,7 +391,7 @@ Figura \ref{fig:I2CCompleteDataTransfer} prezinta etapele unei tranzactionari de
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.75]{figs/I2CCompleteDataTransfer.png}
-    \caption{Exemplu de tranzactie I2C intre un dispozitiv master si unul slave [3npp]}
+    \caption{Exemplu de tranzactie I2C intre un dispozitiv master si unul slave \cite{i2ctutorial}}
     \label{fig:I2CCompleteDataTransfer}
 \end{figure}
 
@@ -481,7 +481,7 @@ Figura \ref{fig:FlaskProjectStructure} prezinta structura unui proiect Python ut
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.75]{figs/FlaskProjectStructure.png}
-    \caption{Structura unui proiect Python utilizand Flask}
+    \caption{Structura unui proiect Python utilizand Flask \cite{flaskweb}}
     \label{fig:FlaskProjectStructure}
 \end{figure}
 
@@ -612,7 +612,7 @@ Figura \ref{fig:MongoDBDocument} prezinta structura unui document dintr-o baza d
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{figs/mongoDBDocument.png}
-    \caption{Exemplu de document [2]}
+    \caption{Exemplu de document \cite{mongoDB}}
     \label{fig:MongoDBDocument}
 \end{figure}
 
