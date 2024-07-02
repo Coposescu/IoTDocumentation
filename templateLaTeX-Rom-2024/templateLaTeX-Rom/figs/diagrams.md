@@ -223,3 +223,43 @@ ss is high
 
 @enduml
 ```
+
+# Application general scheme
+```plantuml
+@startuml
+skinparam shadowing true
+left to right direction
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/font-awesome-6/mobile_screen_button.puml
+FA6_MOBILE_SCREEN_BUTTON(android, Mobile)
+rectangle mqtt as "\nMQTT Broker\n"
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/font-awesome-5/server.puml
+FA5_SERVER(server, Server)
+database mongodb as "\nMongoDB\nDatabase\n"
+rectangle house as " " {
+collections sensor as "\nSensors\n"
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/material/router.puml
+MATERIAL_ROUTER(router, Router)
+}
+
+android --> mqtt  
+android <-- mqtt : MQTT
+android --> server
+android <-- server : HTTP
+mqtt --> server
+mqtt <-- server : HTTP
+server --> mongodb
+server <-- mongodb
+mqtt ---> router
+mqtt <--- router : MQTT
+router --> sensor : Wi-Fi
+router <-- sensor
+
+
+@enduml
+```
