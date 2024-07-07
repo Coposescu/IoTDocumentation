@@ -254,12 +254,105 @@ android <-- server : HTTP
 mqtt --> server
 mqtt <-- server : HTTP
 server --> mongodb
-server <-- mongodb
+server <-- mongodb : "TCP/IP\nSockets"
 mqtt ---> router
 mqtt <--- router : MQTT
 router --> sensor : Wi-Fi
 router <-- sensor
 
+
+@enduml
+```
+
+# Application general scheme
+```plantuml
+@startuml
+skinparam shadowing true
+skinparam linetype poly
+skinparam classAttributeIconSize 0
+
+class ActivityWelcome {
+    -sharedPreferences : SharedPreferences
+    -sensorArrayList : ArrayList<SensorListItem>
+    -scheduler : ScheduledExecutorService
+    +updateMetrics()
+}
+class ActivitySensor {
+    -chartTemperature
+    -chartHumidity
+    +updateMetrics()
+    +chartInitTemperatureData()
+    +chartInitHumidityData()
+}
+class ScheduledDataAcquisition <<Runnable>> {
+    -mqttClient : MQTTClient
+    -sensorListItem : SensorListItem
+    +run()
+    +notifyListeners()
+}
+class UIThreadHandler {
+    -listeners : Set<Listener>
+    +addListener()
+    +removeListener()
+    +notifyListeners()
+}
+class MQTTClient {
+    -mqttAndroidClient
+    +connect()
+    +subscribe()
+    +unsubscribe()
+    +publish()
+    +disconnect()
+}
+class SensorListItem {
+    -name
+    -type
+    -status
+    -imageId
+    -lastTemp
+    -lastHumid
+}
+class DBAPIClient <<Retrofit>> {
+    -retrofit : Retrofit
+    +getClient()
+}
+class SensorReading {
+    +sensorMAC
+    +type
+    +value
+    +timestamp
+}
+class SensorReadingsList {
+    +sensorReadings : List<SensorReading>
+}
+
+
+interface Listener {
+    +updateMetrics()
+}
+interface DBAPIInterface {
+    +doGetSensorReading()
+    +doGetSensorReadingsList()
+}
+
+
+ActivityWelcome ..|> Listener
+ActivityWelcome --|> ScheduledDataAcquisition
+ActivityWelcome --|> SensorListItem
+
+ActivitySensor ....|> Listener
+ActivitySensor --|> DBAPIClient
+
+DBAPIClient --|> DBAPIInterface
+DBAPIInterface --|> SensorReadingsList
+DBAPIInterface --|> SensorReading
+
+ScheduledDataAcquisition --|> UIThreadHandler
+ScheduledDataAcquisition --|> MQTTClient
+ScheduledDataAcquisition --|> SensorListItem
+
+UIThreadHandler --|> UIThreadHandler
+UIThreadHandler o-- Listener
 
 @enduml
 ```
