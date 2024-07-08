@@ -145,13 +145,48 @@ Configurarea si startarea mosquito.
 Utilizarea fisierului care executa task-uri automat in linux.
 Configurarea IP-ului pe care mosquito asculta.
 Ce topic-uri exista. Formatul topic-urilor.
+Diagrama care prezinta subscriber-ul for all.
 
 \section{RESTful Server}\label{sec:pi_restserver}
-Scris in python.
-Diagrama care prezinta subscriber-ul for all.
-Am utilizat Flask detaliere functionalitate Flask.
-Diagrama care prezinta RESTful API.
-Problema cu timpul din python.
+Modulul RESTful Server reprezinta punctul de legatura intre aplicatia Android si baza de date si intre modulul MQTT Broker si baza de date. Acesta este implementat in limbajul 
+de programare Python si utilizeaza biblioteca Flask. Pentru comunicarea cu acesta este utilizat protocolul HTTP. 
+
+Figura \ref{fig:PI_RealFlaskProjectStructure} prezinta structura fisierelor proiectului Python utilizand Flask. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{figs/PI_RealFlaskProjectStructure.png}
+    \caption{Arhitectura generala a proiectului}
+    \label{fig:PI_RealFlaskProjectStructure}
+\end{figure}
+
+Structura fisierelor proiectului respecta structura de baza a unui proiect Python utilizand Flask descrisa in sectiunea \ref{sec:flask}. De asemenea, respecta si 
+modularizarea codului sursa conform modelului arhitectural MVC, Model-View-Controller. In urmatoarele paragrafe se va descrie fiecare modul continut in directorul 
+src/ si care sunt functiile acestora.
+
+Fisierul sensor\_data\_routes.py reprezinta punctul de intrare in aplicatie. Acesta contine o corelare intre adresele URL pe care server-ul le cunoaste si clasele model 
+sub forma de resurse. O adresa URL identifica unic o resursa sau o clasa model. Orice cerere HTTP care vine din retea, de la aplicatia Android sau de la modulul MQTT Broker, 
+vor fi validate in acest modul pe baza andresei URL.
+
+Fisierul sensor\_data\_controller.py reprezinta punctul de control al aplicatiei. Acesta primeste de la modulul Routes resursa care se doreste a fi accesata din baza de date, 
+identifica metoda HTTP si argumentele acesteia, valideaza aceste informatii si transmite catre modulul Model interogarea specifica resursei. La returnarea datelor de catre 
+modulul Model, acesta va transmite catre modulul View datele receptionate pentru a fi formatate corespunzator, iar apoi va transmite raspunsul catre entitatea care a transmis 
+cererea.
+
+Fisierul sensor\_data\_model.py reprezinta modulul Model al aplicatiei. Acesta contine implementarea propriu-zisa a metodelor de interogare a bazei de date. Exista o metoda 
+specifica fiecarei resurse pentru a facilita dezvoltarea ulterioara si optimizarea interogarilor catre baza de date.
+
+Fisierul sensor\_data\_vie.py reprezinta modulul View al aplicatiei. Acesta are rolul de a formata datele extrase din baza de date in formatul pe care entitatea care a 
+efectuat cererea il cunoaste, si anume formatul GSON. 
+
+O problema bine cunoscuta a bibliotecii datetime din limbajului de programare Python si care a fost intampinata la formatarea datelor in modulul View este zona timpului. 
+Atunci cand un sir de caractere este convertit intr-un format de tip timp sau invers, aceasta nu contine informatii legate de zona de timp, UTC sau locala. Sirul de caractere 
+'2024-06-16T11:23:53.015001Z' va fi interpretat ca un obiect de tipul datetime din care informatia 'Z', care inseamna zona de timp UTC, este pierduta. 
+Trebuie specificat explicit ce zona de timp este utilizata la apelul functiei de convertire. Atunci cand este specificata zona de timp, sirul de caractere 
+'2024-06-16T11:23:53.015001Z' va fi interpretat ca un obiect datetime din care informatia 'Z' este inlocuita cu '+00:00'. Ambele siruri, 'Z' si '+00:00' semnifica zona de timp 
+UTC, dar nu toate librariile din alte limbaje de programare interpreteaza corect sirul de caractere '+00:00'. In biblioteca Retrofit, modulul care mapeaza automat un sir de 
+caractere in format GSON pe o clasa model nu interpreteaza corect sirul '+00:00'. Pentru a rezolva aceasta problema, in modulul View, a fost necesara inlocuirea manuala a sirului 
+de caractere '00:00' cu 'Z'. O alta rezolvare a acestei problema ar fi fost scrierea manuala a codului pentru maparea datelor pe o clasa model in loc de utilizarea uneia deja 
+existente in biblioteca Retrofit. 
 
 \section{Baza de date}\label{sec:pi_bazadedate}
 Formatul datelor.

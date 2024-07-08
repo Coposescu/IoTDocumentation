@@ -356,3 +356,18 @@ UIThreadHandler o-- Listener
 
 @enduml
 ```
+
+# Flask Project Structure
+```
+	|-monitoring_system_bknd/
+		|-src/
+			|-__init__.py
+			|-sensor_data_controller.py
+            |-sensor_data_model.py
+            |-sensor_data_routes.py
+            |-sensor_data_view.py
+		|-venv/
+		|-.env
+		|-requirements.txt
+		|-run.py
+```
