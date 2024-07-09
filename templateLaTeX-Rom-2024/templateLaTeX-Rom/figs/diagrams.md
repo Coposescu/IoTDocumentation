@@ -371,3 +371,76 @@ UIThreadHandler o-- Listener
 		|-requirements.txt
 		|-run.py
 ```
+
+# JSON data format from MQTT Broker to Android
+MQTT message 1: {"temperature":28.380}
+MQTT message 2: {"humidity":59.912}
+
+# JSON data format from RESTful Server to Android
+ {
+     "list": [
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.846,
+             "timestamp": "2024-07-08T15:00:03.877000Z"
+         },
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.846,
+             "timestamp": "2024-07-08T15:00:22.911000Z"
+         },
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.846,
+             "timestamp": "2024-07-08T15:00:42.256000Z"
+         },
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.749,
+             "timestamp": "2024-07-08T15:01:01.619000Z"
+         },
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.547,
+             "timestamp": "2024-07-08T15:01:20.949000Z"
+         },
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.45,
+             "timestamp": "2024-07-08T15:01:40.300000Z"
+         },
+         {
+             "sensorMAC": "F8F005ADB2A9",
+             "type": "humidity",
+             "value": 61.322,
+             "timestamp": "2024-07-08T15:01:59.647000Z"
+         }
+     ]
+ }
+
+ # MQTT Broker internal architecture
+
+ ```plantuml
+@startuml
+skinparam shadowing true
+left to right direction
+rectangle mosquitto [
+    MQTT Broker
+    Mosquitto
+]
+rectangle subscriber [
+    \tWildcard
+    MQTT   Subscriber
+]
+
+mosquitto --> subscriber: Every publish
+mosquitto <-- subscriber: Subscribe for #
+
+@enduml
+```
