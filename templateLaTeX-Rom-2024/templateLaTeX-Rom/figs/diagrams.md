@@ -444,3 +444,12 @@ mosquitto <-- subscriber: Subscribe for #
 
 @enduml
 ```
+
+# PI MongoDB Document Example 
+sensorReadings> db.readings.findOne()
+{
+    timestamp: ISODate('2024-06-05T12:54:03.085Z'),
+    metadata: { sensorMAC: 'F8F005ADB2A9', type: 'temperature' },
+    value: 27.514,
+    _id: ObjectId('66605febb0abead3d2c8f28a')
+}

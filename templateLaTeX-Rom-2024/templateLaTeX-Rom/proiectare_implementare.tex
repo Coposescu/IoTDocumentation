@@ -231,10 +231,48 @@ caractere in format GSON pe o clasa model nu interpreteaza corect sirul '+00:00'
 de caractere '00:00' cu 'Z'. O alta rezolvare a acestei problema ar fi fost scrierea manuala a codului pentru maparea datelor pe o clasa model in loc de utilizarea uneia deja 
 existente in biblioteca Retrofit. 
 
-\section{Baza de date}\label{sec:pi_bazadedate}
-Formatul datelor.
-Avantaje ale time database si a indicilor de cautare.
-Prezentare operatie de agregare. Aici sau la Restful server?
+\section{Baza de date MongoDB}\label{sec:pi_bazadedate}
+Acest modul are rolul de a memora datele transmise de catre senzori si de a facilita extractia acestora la cererea utilizatorilor. Acesta comunica prin intermediul 
+protocolului de comunicatie TCP/IP Sockets cu serverul RESTful, acesta din urma reprezentand interfata de comunicare dintre modulele MQTT Broker si Mobile cu baza 
+de date. 
+
+Baza de date MongoDB ofera un mod eficient si optimizat de memorare a datelor care contin o unitate de timp, numit Time Series Collection. Acest lucru face ca aceasta 
+baza de date sa fie cea mai potrivita pentru proiectele din domeniul IoT in care momentul de timp la care datele sunt colectate este foarte important.
+
+Figura \ref{fig:PI_MongodbDocExample} prezinta structura unui document memorat in baza de date. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{figs/PI_MongodbDocExample.png}
+    \caption{Exemplu de document din baza de date}
+    \label{fig:PI_MongodbDocExample}
+\end{figure}
+
+Aceasta baza de date este formata dintr-o colectie numita "readings" care contine mai multe documente. Un document reprezinta datele pe care un sezor le-a achizitionat 
+la un moment de timp. Structura unui document contine urmatoarele campuri:
+\begin{itemize}
+	\item Campul "timestamp" - reprezinta unitatea de timp la care datele au fost achizitionate de catre senzor. Aceasta unitate de timp contine an, luna, zi, ora, 
+	minut, secunda si milisecunda. Formatul unitatii de timp trebuie sa respecte standardul international ISO, care defineste ordinea parametrilor de timp, 
+    fusul orar si caracterele utilizate pentru delimitarea acestora.
+	\item Campul "metadata" - reprezinta informatii despre senzor si despre datele continute in document. Acest camp ar trebui sa contina elemente care se schimba 
+	foarte rar sau niciodata. De asemenea, elementele pe baza carora se fac interogarile in baza de date trebuie sa fie continute in acest camp pentru a beneficia 
+    de eficienta maxima. Acest camp contine adresa MAC a senzorului si tipul metricii venite de la senzor. 
+	\item Campul "value" - reprezinta valoarea metricii venita de la senzor. De exemplu, temperatura in grade celsius.
+	\item Campul "\_id" - reprezinta un sir de caractere generat automat la memorarea documentului care identifica unic acest document.
+\end{itemize}
+
+Figura \ref{fig:PI_AggregationExample} prezinta operatia de agregare utilizata pentru extragerea documentelor care se afla intr-un anumit interval de timp. Prima 
+operatie efectuata este "\$match" care va selecta din baza de date toate documentele care se afla intr-un anumit interval de timp. A doua operatie efectuata este 
+tot operatia "\$match" care va selecta din documentele care au indeplinit conditia primei operatii, doar documentele caare au o anumita adresa MAC si care contin 
+un anumit tip de valori, cum ar fi valori de umiditate. A treia operatie este "\$sort" care va aranja documentele care au indeplinit conditiile celei de-a doua 
+operatii in ordine cronologica. Ordinea acestor operatii este foarte importanta pentru cresterea eficientei. S-a ales operatia de selectare a intervalului de timp 
+ca prima operatie, deoarece este operatia cea mai putin costisitoare de efectuat pe intreaga baza de date. Astfel, setul de documente pe care se efectueaza celelalte 
+doua operatii, care sunt mult mai costisitoare, este diminuat semnificativ.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{figs/PI_AggregationExample.png}
+    \caption{Exemplu de operatie de agregare}
+    \label{fig:PI_AggregationExample}
+\end{figure}
 
 \section{Senzor}\label{sec:pi_senzor}
 
