@@ -275,6 +275,162 @@ doua operatii, care sunt mult mai costisitoare, este diminuat semnificativ.
 \end{figure}
 
 \section{Senzor}\label{sec:pi_senzor}
+Acest modul este compus din doua componente principale, un dispozitiv care are capabilitatile de a esantiona date de temperatura si umiditate si de a comunica 
+printr-un mediu fara fir si un router care realizeaza legatura dintre reteaua locala si internet. Rolul acestui modul este de a realiza o conexiune cu un router,
+de a achizitiona date de temperatura si umiditate si de a le transmite catre aplicatia Android. 
+
+Pentru realizarea senzorului s-a utilizat platforma de dezvoltare Arty Z7 la care este conectat un controller de retea ATWINC1500 si senzorul de temperatura 
+si umiditate HDC1080. Pentru realizarea schemei arhitecturale a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3, iar pentru dezvoltarea codului sursa 
+in limbajul de programare C a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3.
+
+Figura \ref{fig:PI_SensorUnitDiagram} prezinta arhitectura modulului de achizitionare de temperatura si umiditate.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{figs/PI_SensorUnitDiagram.png}
+    \caption{Arhitectura senzorului de temperatura si umiditate}
+    \label{fig:PI_SensorUnitDiagram}
+\end{figure}
+
+\subsection{Platforma de dezvoltare Arty Z7}\label{subsec:artyz7_platform}
+Nucleul platformei de dezvoltare Arty Z7 este sistemul integrat Zynq7000, avand o multitudine de porturi si componente periferice pentru adaptarea la diferite 
+priecte. De pe aceasta platforma sunt utilizate cele doua porturi pmod pentru conectarea senzorului HDC1080 si a controllerului de retea ATWINC1500, sistemul 
+integrat Zynq7000 reprezentand unitatea de control al tututor perifericelor de pe platforma si portul MicroUSB utilizat pentru alimentarea cu 5 volti si pentru 
+comunicatia cu un calculator personal prin interfata de comunicare UART.
+
+Arhitectura interna a sistemului integrat Zynq7000 este formata dintr-un procesor de tip ARM Cortex-A9 cu doua nuclee si partea logica FPGA 7-series. Proiectul 
+de fata utilizeaza procesorul ARM Cortex-A9 pentru crearea unui microcontroller si partea logica pentru conectarea porturilor necesare la microcontroller. 
+
+Schema de design a platformei Arty Z7 contine un set de periferice si porturi care sunt conectate la procesorul ARM Cortez-A9 si un set de periferice si porturi 
+conectate la partea logica FPGA. De exemplu, porturile pmod sunt conectate la partea logica, iar portul MicroUSB este conectat la procesor. Pentru utilizarea 
+componentelor sau porturilor periferice conectate la partea logica FPGA in procesorul ARM Cortex-A9 este utilizata interfata EMIO care este o extensie a 
+multiplexorului de intrari si iesiri al procesorului.
+
+Figura \ref{fig:PI_ZynqBlockDesign} prezinta interconexiunea dintre procesor si porturile periferice.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.68]{figs/PI_ZynqBlockDesign.png}
+    \caption{Diagrama de proiectare}
+    \label{fig:PI_ZynqBlockDesign}
+\end{figure}
+
+Portul "ATWINC\_IRQN" reprezinta semnalul de intrerupere al controllerului de retea ATWINC1500 activ in 0 logic. Acesta este conectat la o poarta NU pentru a 
+inversa polaritatea semnalului, deoarece unitatea generala de control al intreruperilor (GIC) nu are polaritate configurabila. Acesta genereaza o intrerupere 
+doar la tranzitia din 0 logic in 1 logic. Porturile a caror denumire incep cu "SPI0" reprezinta semnalele protocolului SPI utilizate in comunicarea cu controllerul 
+de retea ATWIN1500, iar portul "GPIO" reprezinta semnalul de reset al modulului ATWINC1500 care, la fel ca semnalul de intrerupere, este activ in 0 logic. Aceste 
+semnale sunt legate la portul PMODA (JA) de pe platforma Arty Z7.
+
+Portul "IIC\_0\_0" reprezinta semnalele protocolului I2C utilizat in comunicatia cu senzorul de temperatura si umiditate HDC1080. Aceste semnale sunt legate pe 
+portul PMODB (JB) de pe platforma Arty Z7.
+
+Porturile "DDR" si "FIXED\_IO" sunt generate automat la crearea unitatii de procesare. Portul "DDR" realizeaza conexiunea dintre procesorul ARM Cortex-A9 si memoria 
+externa DDR utilizata la incarcarea si executarea codului sursa, iar portul "FIXED\_IO" reprezinta semnalele de intrare/iesire ale perifericelor utilizate. De exemplu 
+semnalele conectate intre interfata UART si portul microUSB.
+
+Pentru creearea diagramei de proiectare in mediul de lucru Vivado 2018.3 sunt necesari urmatorii pasi descrisi succint:
+\begin{enumerate}
+	\item Se creeaza un proiect nou selectand sistemul integrat Zynq7000.
+	\item Din meniul "IP Integrator" se creeaza un nou bloc de design.
+	\item Prin apasarea butonului "Add IP" din fereastra design-ului se adauga procesorul Zynq7000.
+	\item Prin dublu click pe blocul nou aparut al procesorului se deschide meniul de configurare al acestuia. Din acest meniu se selecteaza sursa de ceas si frecventa 
+	acestuia, liniile de intrare iesire si perifericele utilizate.
+    \item La apasarea butonului "OK" vor aparea pe blocul procesorului toate perifericele care se conecteaza la o componenta externa.
+    \item Crearea porturilor externe se face prin click dreapta pe diagrama si "Create port". Acestuia i se atribuie un nume, o directie si un tip.
+    \item Pe baza diagramei create Vivado va genera automat instructiunile necesare maparii porturilor prin click dreapta pe fisierul designului si "Create HDL Wrapper".
+    \item Se genereaza sirul de biti pentru partea logica FPGA prin apasarea butonului "Generate Bitstream".
+    \item Se exporta diagrama si sirul de caractere intr-un fisier pe care mediul de dezvoltare Xilinx SDK il va interpreta si va genera driverele necesare. Acest 
+    fisier contine informatiile necesare generarii driverului doar pentru perifericele activate si configurate la pasul 4.
+\end{enumerate}
+
+Platforma de dezvoltare Arty Z7 ofera ca sursa de ceas un crystal cu frecventa de 50 MHz care este conectat ca intrare in procesorul ARM Cortex-A9. Procesorul multiplica 
+semnalul de ceas printr-un circuit PLL, iar apoi il distribuie componentelor periferice. Alegerea frecventei sursei de ceas este in stransa legatura cu modulele timer 
+necesare functionarii aplicatiei, si anume, doua module timer care numara la milisecunda. Pentru a obtine o acuratete cat mai buna a milisecundei, sursa de ceas este 
+multiplicata cu un factor de 16, obtinand astfel o frecventa a sursei de ceas de 400Mhz.
+
+Figura \ref{fig:PI_SDKFileStructure} prezinta structura fisierelor proiectului in mediul de programare Xilinx SDK. Fiecare director reprezinta un modul al proiectului 
+si contine fisere asociate cu denumirea acestuia.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.66]{figs/PI_SDKFileStructure.png}
+    \caption{Structura fisierelor proiectului}
+    \label{fig:PI_SDKFileStructure}
+\end{figure}
+
+Driverul generat automat de catre mediul de dezvoltare Xilinx SDK se afla intr-un proiect separat numit "Zynq7000\_atwinc\_sdk\_bsp". Acest proiect este generat automat 
+bazat pe fisierul ".hdf" exportat de mediul de dezvoltare Vivado.
+
+Directorul "MQTT" contine rutinele necesare crearii si mentinerii unei conexiuni cu un Broker MQTT si formatarea pachetelor conform acestui protocol. Implementarea 
+driverului este oferita de organizatia Eclipse cu liceta deschisa si poate fi descarcat sub forma de arhiva de pe github. Acest driver este impartit in doua directoare, 
+"MQTTClient-C" si "MQTTPacket". Directorul "MQTTClient-C" contine rutinele necesare crearii si mentinerii conexiunii, iar "MQTTPacket" contine rutine pentru serializarea 
+diferitelor pachete specifice protocolului MQTT. Fisierul antet din directorul "MQTTClient-C" contine declaratii externe ale rutinelor de scriere si citire a unui pachet si 
+ale rutinelor pentru managementul timerelor care sunt specifice fiecarei platforme si trebuie implementate de catre integratorul driverului. Driverul este compatibil cu 
+mai multe platforme, Linux, Windows, EmbeddedOS sau Embedded. Functionalitatea oferita pentru platforma Embedded este bazata pe asteptare ocupata, firul de executie 
+este blocat pentru asteptarea raspunsului pentru un anumit pachet, care este o practica contraindicata in sistemele embedded. Avand in vedere acest lucru, fisierele 
+din directorul "MQTTClient-C" au fost modificate astfel incat sa nu mai blocheze firul de executie. Modificarile constau in inlocuirea zonelor de cod unde se asteapta 
+receptionarea unui raspuns la pachetul transmis sau expirarea timpului acordat pentru operatia curenta cu o variabila de stare si un modul timer global care este 
+verificat periodic la frecventa rularii buclei principale. Variabila de stare contine statusul curent al modulului MQTT, operatie in derulare sau liber pentru 
+o noua operatie si functioneaza ca un semafor, daca exista o operatie in derulare nu se va initia o noua operatie si la urmatoarea executie a buclei principale se va 
+verifica din nou daca este posibila initierea noii operatii. Timerul global se asigura ca daca o operatie in derulare nu ofera nici un raspuns intr-o perioada 
+predefinita, acesta va executa rutinele necesare rezolvarii erorii care a dus la pierderea operatiei. La rutinele din directorul "MQTTPacket" nu au fost ecesare 
+modificari, fiind complet decuplate de platforma de executie. 
+
+Directorul "ATWINC15x0" reprezinta driverul pentru controlerul ATWINC1500 oferit de organizatia Microchip sub licenta libera. Driverul este inclus in libraria 
+"mla", Microchip Libraries for Applications, si poate fi descarcat de pe site-ul oficial al organizatiei Microchip. Acesta este descris in detaliu in subcapitolul
+\ref{subsec:atwinc1500}.
+
+Directorul "Interfaces" reprezinta o abstractizare a driverelor utilizate in proiect, Zynq driver, ATWINC1500 driver si MQTT driver. Fiecare fisier sursa din acest director 
+contine rutine pentru initializarea perifericului specific denumirii fisierului si rutine pentru controlul acestuia. De asemenea, in cazul perifericelor care functioneaza 
+bazat pe intreruperi fisierul contine si rutinele de tip Handler care se executa la aparitia unui eveniment. Fisierele antet contin macrouri pentru caracteristicile 
+fiecarui periferic, macrouri pentru identificarea pinilor sau pentru functii care pot fi sicrise intr-o singura linie de cod, si declaratii ale rutinelor care sunt 
+utilizate de fisiere externe. Fisierele utils.c si utils.h contin rutine generale utile intr-un proiect, cum ar fi o rutina pentru blocarea executiei pentru o anumita 
+perioada de timp (BusyDelay) si rutine pentru conversii intre tipuri de veriabile, de exemplu conversia din float in string sau inversarea ordinii caracterelor intr-un 
+string. Fisierele "netwrok\_protocol.c" si "network\_protocol.h" abstractizeaza operatiile necesare pentru initializarea si crearea unui Socket si pentru conectarea 
+la server.
+
+Directorul "Application" contine fisiere sursa si antet specifice aplicatiei. Fisierul "acquisition.c" contine rutine pentru initializarea si gestionarea achizitiei 
+de date de la senzorul de temperatura si umiditate HDC1080. Acesta contine o masina de stari care initiaza o noua achizitie de date, asteapta finalizarea acesteia, 
+converteste valorile obtinute in sir de caractere si gestioneaza posibilele erori. Fisierul "acquisition.h" contine declaratia starilor masinii de stari si a 
+variabilelor si functiilor utilizate de fisiere externe. Fisierul "publish.c" este responsabil cu calcularea urmatorului moment in care se va transmite un pachet,
+de creearea pachetului si adaugarea acestuia in coada. Fisierul "app.c" contine masina de stare generala a aplicatiei, functii de tip handler care gestioneaza 
+evenimentele care au loc in retea, masina de stare pentru resetarea dispozitivului la setarile din fabrica si defineste o coada de mesaje si rutinele necesare 
+pentru gestiunea acesteia, adaugare pachet, extragere pachet, stergere pachet. 
+
+Directorul "Peripherals" contine fisierele specifice fiecarui periferic al platformei Zynq Z7, controlerul de retea ATWINC1500 si senzorul de temperatura si 
+umiditate HDC1080. Fisierele "hdc1080.c" si "hdc1080.h" definesc rutinele pentru initializarea si configurarea modulului HDC1080. De asemenea, contine si o masina 
+de stare pentru inceperea unei esantionari de date si citirea acestora. Fisierul "winc1500\_api.c" reprezinta fisierul in care sunt implementate functiile de tip 
+stub specifice modulului ATWINC1500.
+
+Fisierul lscript.ld reprezinta fisierul care defineste adresa de baza a memoriei unde este scris codul sursa, dimensiunea memoriilor RAM si dimensiunea stivei.
+
+Figura \ref{fig:PI_MainStateMachine} prezinta principalele sarcini si evenimente ale senzorului.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.66]{figs/PI_MainStateMachine.png}
+    \caption{Masina de stare principala}
+    \label{fig:PI_MainStateMachine}
+\end{figure}
+
+The FSBL needed for uploading the board
+Ce timere folosesc si pentru ce sunt necesare.
+Diagrama cu modul in care sunt legate liniile pentru ATWINC si HDC1080. Pin si denumire/functie.
+
+\subsection{Controllerul de retea ATWINC1500}\label{subsec:atwinc1500}
+Driverul acestuia contine in fisierul antet "winc1500\_api.h" declaratii ale rutinelor care sunt specifice fiecarei platforme si care trebuie implementate de catre 
+integratorul driverului. Acestea sunt numite functii stub si implementarea corecta a acestora este necesara pentru functionarea rutinelor driverului. Acestea sunt 
+descrise in urmatoarele puncte:
+\begin{enumerate}
+	\item m2mStub\_PinSet\_CE - implementeaza managementul pinului CHIP\_EN. Valoarea 1 logic activeaza modulul ATWINC1500, iar valoarea 0 logic il dezactiveaza.
+	\item m2mStub\_PinSet\_RESET - implementeaza managementul pinului RESET. Acesta este utilizat pentru resetarea modulului si este activ in 0 logic.
+	\item m2mStub\_PinSet\_SPI\_SS - implementeaza managementul pinului SS al interfetei SPI. 
+	\item m2mStub\_EintEnable - activeaza intreruperile pe pinul IRQN al modulului.
+	\item m2mStub\_EintDisable - dezactiveaza intreruperile pe pinul IRQN al modulului.
+	\item m2mStub\_SpiTxRx - implementeaza functionalitatea de transfer de date prin interfata SPI.
+	\item m2mStub\_GetOneMsTimer - accesseaza registrul Counter al timerului dedicat pentru modulul ATWINC1500 si returneaza valoarea acestuia.
+\end{enumerate}
+
+TThe way the interrupt is implemented in the driver
+
+\subsection{Senzorul de temperatura si umiditate HDC1080}\label{subsec:hdc1080}
+
 
 
 {\color{blue}Împreună cu capitolul \textbf{precedent} și cel \textbf{următor} trebuie să reprezinte aproximativ 70\% din total.\\}

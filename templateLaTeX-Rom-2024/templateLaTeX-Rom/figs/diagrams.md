@@ -453,3 +453,79 @@ sensorReadings> db.readings.findOne()
     value: 27.514,
     _id: ObjectId('66605febb0abead3d2c8f28a')
 }
+
+# PI - Sensor Unit Diagram
+
+ ```plantuml
+@startuml
+skinparam shadowing true
+left to right direction
+skinparam linetype ortho
+
+component artyz7 as "Arty Z7" {
+    !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+    !include $ICONURL/common.puml
+    !include $ICONURL/font-awesome-6/microchip.puml
+    FA6_MICROCHIP(zynq7000, "Zynq 7000")
+    
+}
+component wincxpro as "WINC1500-XPRO" {
+    !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+    !include $ICONURL/common.puml
+    !include $ICONURL/font-awesome-6/wifi.puml
+    FA6_WIFI(atwinc1500, ATWINC1500)
+}
+
+component hygro as "Pmod HYGRO" {
+    !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+    !include $ICONURL/common.puml
+    !include $ICONURL/font-awesome-6/temperature_high.puml
+    FA6_TEMPERATURE_HIGH(hdc1080, HDC1080)
+}
+
+wincxpro <----> artyz7 : SPI
+wincxpro <---- artyz7 : RESET_N
+wincxpro ----> artyz7 : IRQ
+artyz7 <---> hygro : I2C
+
+
+@enduml
+```
+
+# PI - Main State Machine
+ ```plantuml
+@startuml
+skinparam shadowing true
+skinparam ConditionEndStyle diamond
+:Initialize all peripherals;
+repeat :Search for AP information in memory;
+if (Have saved AP info?) then (Yes)
+    :Connect to router;
+    :Initialize MQTT module;
+    :Connect Socket;
+    :Connect to MQTT Broker; 
+    :Subscribe for Alarms;
+    repeat
+        if (Queue Empty?) then (No)
+            :Prepare packet;
+            :Send MQTT Publish;
+        elseif (Publish time?) then (No)
+        elseif (Data ready?) then (Yes)
+            :Enqueue MQTT publish;
+            :Compute Next publish;
+        else
+            :Start Acq;
+        endif
+    repeat while (Lost Router Connection?) is (No) not (Yes)
+else (No)
+    :Enter AP Mode;
+    :Wait user connection;
+    :Listen for Socket Conn;
+    :Exchange router info;    
+    :Save router info;
+    :Close AP Mode;
+endif
+repeat while
+
+@enduml
+```
