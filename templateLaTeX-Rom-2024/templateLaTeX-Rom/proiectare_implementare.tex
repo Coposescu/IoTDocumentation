@@ -456,7 +456,13 @@ in care variabila care mentine secunda la care urmatorul pachet trebuie pregatit
 urmatoarea rulare a buclei vor fi gasite doua mesaje in coada de aplicatie si vor fi transmise catre Brokerul MQTT.
 
 \subsection{Controllerul de retea ATWINC1500}\label{subsec:atwinc1500}
-Driverul acestuia contine in fisierul antet "winc1500\_api.h" declaratii ale rutinelor care sunt specifice fiecarei platforme si care trebuie implementate de catre 
+Aesta este un sistem integrat intr-un singur cip care ofera o interfata accesibila si eficienta pentru conectarea la o retea Wi-Fi. Contine stiva de comunicare TCP/IP 
+integrata in cip, suporta standardele de comunicatie IEEE 802.11 b/g/n si opereaza in banda de frecventa 2.4 GHz.
+
+WINC1500-XPRO reprezinta o placa de extensie pentru modulul ATWINC1500 care ofera un conector de 20 de pini pentru a facilita integrarea acestuia cu un microcontroler 
+gazda. Interfata de comunicare dintre acesta si platforma Arty Z7 este SPI, iar interfata API care defineste setul de reguli si tipul de mesaje acceptate de modulul 
+ATWINC1500 este implementata in driverul oferit de microchip. Aceasta implementare trebuie adaptata la platforma utilizata, iar pentru acest lucru in fisierul antet 
+"winc1500\_api.h" exista declaratii ale rutinelor care sunt specifice fiecarei platforme si care trebuie implementate de catre 
 integratorul driverului. Acestea sunt numite functii stub si implementarea corecta a acestora este necesara pentru functionarea rutinelor driverului. Acestea sunt 
 descrise in urmatoarele puncte:
 \begin{enumerate}
@@ -469,7 +475,9 @@ descrise in urmatoarele puncte:
 	\item m2mStub\_GetOneMsTimer - accesseaza registrul Counter al timerului dedicat pentru modulul ATWINC1500 si returneaza valoarea acestuia.
 \end{enumerate}
 
-TThe way the interrupt is implemented in the driver
+In fisa de date a modulului ATWINC1500 \cite{atwinc1500} este precizat ca ofera suport pentru protocolul Wi-Fi Direct care ar fi fost util in procesul de instalare al senzorului,
+dar versiunile de microprogram de pe modulul ATWINC1500 mai noi de versiunea din data de 10/2018 nu mai suporta acest protocol. Astfel, pentru procesul de instalare al 
+device-ului este utilizat AP in care modulul ATWINC1500 se comporta ca un router care suporta conectarea unui singur dispozitiv.
 
 \subsection{Senzorul de temperatura si umiditate HDC1080}\label{subsec:hdc1080}
 Acesta este un senzor digital care masoara temperatura si umiditatea mediului in care se afla cu un consum de energie foarte mic. 
@@ -486,7 +494,9 @@ registrului indicator se initiaza tranzactia I2C de citire in care se transmite 
 Registrul indicator al senzorului se incrementeaza automat dupa citirea unei adrese, ceea ce face posibila citirea temperaturii si umiditatii, care sunt doi registri 
 diferiti, intr-o singura tranzactie I2C de citire.
 
-Figura \ref{fig:PI_HDC1080ReadOperation} prezinta .
+Figura \ref{fig:PI_HDC1080ReadOperation} prezinta o captura a unei tranzactii I2C pentru citirea metricilor senzorului efectuata cu un analizor logic. Figura contine 
+inceputul tranzactiei in partea de sus si finalul tranzactiei in partea de jos, mijlocul tranzactiei fiind omis deoarece este format din incercari de initiere a unei 
+tranzactii la care senzorul raspunde cu NACK. In paragraful urmator figurii este descrisa in detaliu tranzactia.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.55]{figs/PI_HDC1080ReadOperation.png}
@@ -494,15 +504,12 @@ Figura \ref{fig:PI_HDC1080ReadOperation} prezinta .
     \label{fig:PI_HDC1080ReadOperation}
 \end{figure}
 
-
-{\color{blue}Împreună cu capitolul \textbf{precedent} și cel \textbf{următor} trebuie să reprezinte aproximativ 70\% din total.\\}
-
-Scopul acestui capitol este de a documenta aplicația dezvoltată în așa fel încât dezvoltarea și întreținerea ulterioară să fie posibile.
-Cititorul trebuie să identifice funcțiile principale ale aplicației din ceea ce este scris aici.
-Capitolul ar trebui sa conțină (nu se rezumă neapărat la):
-\begin{itemize}
-	\item schema generală a aplicației
-	\item descrierea fiecărei componente implementate, la nivel de modul
-	\item diagrame de clase, clase importante și metode ale claselor importante.
-    \item diagrame de baze de date
-\end{itemize}
+Pentru a incepe o achizitie de temperatura si umiditate trebuie executata o operatie de scriere a registrului pointer in care adresa scrisa in registrul pointer este 
+0x00, adica adresa registrului de temperatura. Acest lucru este reprezentat de primii 2 octeti din partea de sus a figurii la care senzorul raspunde cu ACK. Al treilea 
+si al patrulea octet din partea de sus a figurii reprezinta initieri a unei tranzactii de citire la care senzorul raspunde cu NACK, deoarece continutul acestuia nu a 
+fost actualizat. Primul octet din partea de jos a figurii reprezinta tot o initiere a operatiei de citire la care senzorul raspunde cu NACK. La al doilea octet, in schimb, 
+senzorul raspunde cu ACK, ceea ce inseamna ca achizitia s-a incheiat si valorile temperaturii si a umiditatii pot fi citite. Octetii 3 si 4 reprezinta valoarea 
+temperaturii, iar octetii 5 si 6 reprezinta valoarea umiditatii. Ambele valori sunt reprezentate pe 16 biti avand cel mai putin semnificativi 2 biti mereu 0x00, 
+deoarece rezolutia convertorului din analog in digital este de maximum 14 biti. Pentru a obtine temperatura in grade celsius si umiditatea in procent, valorile 
+obtinute la finalul achizitiei trebuie trecute prin doua formule, una specifica temperaturii si una specifica umiditatii. Aceste formule sunt oferite de catre 
+fisa de date a senzorului.
