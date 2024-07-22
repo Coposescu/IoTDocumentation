@@ -409,9 +409,51 @@ Figura \ref{fig:PI_MainStateMachine} prezinta principalele sarcini si evenimente
     \label{fig:PI_MainStateMachine}
 \end{figure}
 
-The FSBL needed for uploading the board
-Ce timere folosesc si pentru ce sunt necesare.
-Diagrama cu modul in care sunt legate liniile pentru ATWINC si HDC1080. Pin si denumire/functie.
+Urmatoarele paragrafe contin o descriere a fluxului de executie prezentat in figura \ref{fig:PI_MainStateMachine} cu accentul pe functionalitatile care nu au putut 
+fi cuprinse in figura din cauza complexitatii si a dimensiunii. 
+
+La pornirea sistemului este executata starea "Initialize all peripherals" unde sunt initializate toate perifericele utilizate de catre aplicatie, atat cele externe 
+platformei Arty Z7, modulul HDC1080 si modulul ATWINC1500, cat si cele integrate, modulele Clock, Timer, Interrupts etc.
+
+La pornirea buclei infinite este executata starea "Search for AP information in memory" in care se verifica daca modulul ATWINC1500 contine in memorie informatiile 
+necesare pentru conectarea la un router. Aceste informatii sunt numele retelei (SSID), tipul de autentificare si parola, fiind memorate la finalul procesului de instalare. 
+Daca nu exista informatii salvate in memorie, se va executa ramura din dreapta a figurii \ref{fig:PI_MainStateMachine}, ramura "Nu" a conditiei "Have saved AP info?". 
+Aceasta ramura prezinta pasii care sunt executati in procesul de instalare al senzorului.
+
+Procesul de instalare al senzorului incepe cu starea "Enter AP Mode" unde modulul ATWINC1500 intra in starea de AP (Access Point). In aceasta stare dispozitivul 
+functioneaza ca un router care accepta o singura conexiune. Apoi, in starea "Wait user connection", modulul ATWINC1500 asteapta ca aplicatia Android sa se conecteze 
+la el. Dupa realizarea conexiunii se executa starea "Listen for Socket Conn" unde modulul ATWINC1500 creeaza un socket si asteapta ca aplicatia Android sa se conecteze 
+la acest socket pentru a putea comunica. Dupa realizarea conexiunii la socket, in starea "Exchange router info" senzorul primeste informatiile necesare pentru conectarea 
+la un router. Aceste informatii sunt salvate in memorie in starea "Save router info", iar apoi se intra pe fluxul de executie al cazului in care informatiile routerului 
+exista in memorie.
+
+In starea "Connect to router" este realizata conexiunea senzorului la router bazat pe informatiile din memorie. 
+
+Dupa conectarea cu succes la router este executata starea "Initialize MQTT module" unde este initializat driverul MQTT. In aceasta stare se aloca zonele de memorie 
+utilizate pentru transmisia si receptia de pachete si timpul de asteptare pentru receptia unui raspuns.
+
+In starea "Connect Socket" se creeaza un canal de comunicatie si se realizeaza conexiunea cu masina pe care ruleaza Brokerul MQTT.
+
+Dupa conectarea cu success la platforma in care ruleaza Brokerul MQTT, in starea "Connect to MQTT Broker", se realizeaza conexiunea cu acesta prin transmiterea 
+pachetului MQTT CONNECT.
+
+In starea "Subscribe for alarms" senzorul transmite un mesaj Brokerului MQTT prin care cere subscriptia la topicul pentru configurari. Acest topic este utilizat pentru 
+receptia de mesaje de configurare de la aplicatia Android.
+
+Daca in oricare din starile care presupun o conexiune cu un modul extern are loc o eroare se va aplica un algoritm de crestere a timpului intre reincercari 
+exponential. Acest algoritm incepe cu o reincercare imediata, apoi va reincerca conexiunea dupa 10 secunde, dupa 30 de secunde, dupa un minut si in final la fiecare 
+5 minute. Acest algoritm previne reincercarea conexiunii prea frecvente care poate duce la supraincarcarea modulului extern.
+
+Urmatoarea stare este ilustrata prinytr-un romb gol care semnifica inceperea buclei de functionare a aplicatiei. Cat timp senzorul functioneaza normal, nu se pierde 
+conexiunea cu oricare din modulele externe sau nu este actionat fizic de catre utilizator, aceasta va executa aceasta bucla la infinit. In aceasta bucla, in starea 
+"Queue Empty?" se verifica daca exista un mesaj in coada de aplicatie. Daca exista un mesaj acesta este transmis, iar daca nu exista se trece mai departe si se verifica, 
+in starea "Publish time" daca a venit momentul pregatirii unui nou pachet. Acest moment este calculat in secunde si este mentinut intr-o variabila globala. Daca 
+secunda curenta este mai mica decat secunda la care trebuie pregatit urmatorul pachet se reia bucla, altfel se executa conditia "Data Ready?". Aceasta conditie 
+informeaza modulul de achizitie ca este necesar un nou set de date de temperatura si umiditate. Daca aceste date nu sunt pregatite, se va executa starea "Start Acquisition" 
+care porneste o noua achizitie, apoi la fiecare executie a buclei se verifica daca achizitia s-a finalizat. La finalul achizitiei, sunt pregatite doua pachete de tip 
+PUBLISH in care sunt adaugate datele achizitionate, iar apoi sunt urcate in coada de aplicatie in starea "Enqueue MQTT Publish". Urmeaza starea "Compute Next publish" 
+in care variabila care mentine secunda la care urmatorul pachet trebuie pregatit este calculata bazat pe secunda curenta a sistemului si pe perioada de publicare. La 
+urmatoarea rulare a buclei vor fi gasite doua mesaje in coada de aplicatie si vor fi transmise catre Brokerul MQTT.
 
 \subsection{Controllerul de retea ATWINC1500}\label{subsec:atwinc1500}
 Driverul acestuia contine in fisierul antet "winc1500\_api.h" declaratii ale rutinelor care sunt specifice fiecarei platforme si care trebuie implementate de catre 
@@ -430,7 +472,27 @@ descrise in urmatoarele puncte:
 TThe way the interrupt is implemented in the driver
 
 \subsection{Senzorul de temperatura si umiditate HDC1080}\label{subsec:hdc1080}
+Acesta este un senzor digital care masoara temperatura si umiditatea mediului in care se afla cu un consum de energie foarte mic. 
 
+PmodHYGRO reprezinta platforma, placa de circuite integrate, pe care se afla senzorul HDC1080. Aceasta ofera circuitele pasive necesare functionarii senzorului si 
+un conector pmod care face usoara conectarea acestuia la platforma Arty Z7.
+
+Protocolul de comunicare cu senzorul este I2C. Acesta are rolul de slave, iar procesorul Zynq 7000 are rolul de master pe magistrala I2C. Modulul HDC1080 are un 
+registru indicator care mentine ultima adresa de la care s-a efectuat o citire sau o scriere. Pentru realizarea unei scrieri sau citiri a unui registru, mai intai 
+trebuie scris registrul indicator, iar apoi efectuata scrierea sau citirea efectiva a registrului dorit. Primul octet transmis contine adresa I2C pe 7 biti a 
+modulului HDC1080 si bitul care indica o scriere sau o citire. Al doilea octet contine adresa registrului cu care se efectueaza operatia de citire sau scriere. 
+In cazul unei scrieri, dispozitivul master transmite al doile si al treilea octet care contin date fara a intrerupe comunicatia. In cazul unei citiri, dupa scrierea 
+registrului indicator se initiaza tranzactia I2C de citire in care se transmite din nou adresa I2C si bitul de citire, iar apoi se receptioneaza un numar de octeti. 
+Registrul indicator al senzorului se incrementeaza automat dupa citirea unei adrese, ceea ce face posibila citirea temperaturii si umiditatii, care sunt doi registri 
+diferiti, intr-o singura tranzactie I2C de citire.
+
+Figura \ref{fig:PI_HDC1080ReadOperation} prezinta .
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.55]{figs/PI_HDC1080ReadOperation.png}
+    \caption{Operatia de citire a temperaturii si a umiditatii}
+    \label{fig:PI_HDC1080ReadOperation}
+\end{figure}
 
 
 {\color{blue}Împreună cu capitolul \textbf{precedent} și cel \textbf{următor} trebuie să reprezinte aproximativ 70\% din total.\\}
