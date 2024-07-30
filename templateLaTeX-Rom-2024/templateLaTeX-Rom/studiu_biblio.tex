@@ -2,6 +2,187 @@
 
 \pagestyle{fancy}
 
+In cadrul acestui capitol vor fi prezentate sisteme de monitorizare a calitatii aerului asemanatoare cu cel prezentat in lucrarea de fata.
+
+Majoritatea sistemelor de monitorizare a calitatii aerului de pe piata in momentul redactarii acestei lucrari nu ofera suport pentru acesarea datelor de 
+la distanta sau accesarea datelor istorice. Acestea sunt concepute cu un ecran mare pe care sunt afisate ultimele valori citite ale metricilor de calitate a 
+aerului acompaniate de culori care codifica anumite intervale de valori de la calitatea aerului foarte buna pana la calitatea aerului foarte slaba si, uneori, 
+de un sunet de alarma atunci cand calitatea aerului este considerata slaba.
+
+In urmatoarele sectiuni sunt prezentate sisteme de monitorizare a calitatii aerului care ofera suport wireless.
+
+\section{Solutia Airthings}\label{sec:airthingsWavePlus}
+\subsection{Descriere}\label{subsec:airthings_descriere}
+Solutia oferita de compania Airthings se concentreaza pe calitatea aerului in spatii inchise. Aceasta include senzori de calitate a aerului, un gateway si conexiune 
+de la distanta prin intermediul unei aplicatii mobile si a unei pagini web.
+
+Aceasta solutie poate fi impartita in 2 categorii, conexiune bluetooth si conexiune prin gateway. Conexiunea bluetooth are ca tinta spatiile inchise mici, 
+cum ar fi locuintele care necesita un numar mic de senzori, intre 1 si 3 senzori. Conexiunea prin gateway are ca tinta spatiile inchise mari, cum ar fi cladirile de 
+birouri unde este necesar un numar mai mare de senzori, intre 3 si 10 senzori.
+
+Figura \ref{fig:sb_airthingsNetwork} prezinta solutia oferita de Airthings. In paragrafele urmatoare sunt descrise modulele prezentate in aceasta figura.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{figs/sb_airthingsNetwork.png}
+    \caption{Reteaua Airthings}
+    \label{fig:sb_airthingsNetwork}
+\end{figure}
+
+Modulul senzor are rolul de a achizitiona metrici de calitate a aerului si de a le transmite catre modulul Hub. Acesta functioneaza pe baterii si are o durata de 
+viata de pana la 15 luni. Protocolul de comunicatie utilizat in reteaua interna compusa din senzori si gateway se numeste SmartLink si este un protocol proprietar 
+dezvoltat de compania Airthings. Banda de frecventa in care senzorii comunica cu gatewayul este 868 MHz pentru Europa si 915 MHz pentru Statele Unite. Utilizarea 
+acestei benzi de frecventa ofera o raza de acoperire a comunicatiei mai mare decat banda 2.4 GHz, mai ales in spatii inchise care contin multe obstacole.
+
+Modulul Hub reprezinta gatewayul sistemului. Acesta are rolul de interfata intre senzori si internet, centralizand datele receptionate de la senzori si tranferandule 
+mai departe in cloud. Conexiunea la internet se poate realiza prin cablu ethernet sau printr-o cartela SIM preinstalata de producator. Numarul maxim de senzori care 
+pot fi conectati la modulul Hub este 10.
+
+Modulul Cloud are rolul de a salva datele intr-o baza de date si de a oferi date istorice si date in timp real modulului Aplications.
+
+Modulul Aplications ofera o interfata web sau pe telefonul mobil care afiseaza utilizatorului datele colectate de la senzori intr-un mod intuitiv.
+
+Senzorii au capacitatea de a comunica si prin standarul Bluetooth direct cu aplicatia de pe telefonul mobil. In cazul acesta datele colectate de senzori sunt 
+mentinute in memoria acestuia si transferate catre aplicatie atunci cand exista conexiune Bluetooth. Aplicatia are capacitatea de a monitoriza mai multi senzori 
+in acelasi timp daca exista conexiune.
+
+Airthings ofera mai multe tipuri de senzori care se deosebesc prin metricile de calitate a aerului colectate. Cel mai complex dintre acestea este Airthings Wave 
+Plus care colecteaza urmatoarele metrici:
+\begin{itemize}
+	\item Gazul radioactiv Radon.
+	\item Dioxid de Carbon (CO2).
+	\item Concentratia Compusilor Organici Volatili Totala (TVOC)
+	\item Umiditate.
+	\item Temperatura.
+	\item Presiunea Aerului.
+\end{itemize}
+
+\subsection{Avantaje}\label{subsec:airthings_avantaje}
+\begin{itemize}
+	\item Colectarea metricii radon.
+	\item Functionarea pe baterii pana la 15 luni.
+\end{itemize}
+
+\subsection{Dezavantaje}\label{subsec:airthings_dezavantaje}
+\begin{itemize}
+	\item Numarul maxim de 10 senzori suportati de gateway este mic in cazul cladiririlor de birouri.
+	\item Fara achizitionarea unui gateway, datele istorice care pot fi accesate sunt pe o perioada foarte scurta, limitata de memoria interna a senzorilor.
+\end{itemize}
+
+\section{Solutia Awair}\label{sec:awair}
+\subsection{Descriere}\label{subsec:awair_descriere}
+Solutia oferita de compania Awair este asemanatoare cu cea oferita de compania Airthings. Aceasta se concentreaza pe spatii inchise si include senzori de calitate 
+a aerului, un gateway in anumite configuratii de retea, un server in cloud si aplicatie web sau pe telefon pentru gestiunea datelor. Ofera doua tipuri de senzori, 
+unul pentru locuinte si unul pentru cladiri mari, cum ar fi scoli sau cladiri de birouri.
+
+Solutia oferita de Awair pentru locuinte este senzorul Awair Element. Acesta este un senzor de sine statator capabil de crearea unei conexiuni prin protocolul 
+Bluetooth sau prin protocolul Wi-Fi. Acesta este destinat pentru utilizarea impreuna cu un router uzual. Conexiunea Bluetooth este utilizata la instalarea senzorului 
+unde, prin aplicatia pentru telefon Awair Home se realizeaza conexiunea Bluetooth si se transmit catre senzor informatii despre routerul la care acesta urmeaza sa 
+se conecteze. La finalul procesului de instalare senzorul opreste conexiunea Bluetooth cu telefonul si se conecteaza la routerul despre care a primit informatii 
+prin protocolul Wi-Fi. Din acest moment senzorul transmite periodic date catre serverul cloud. Aceasta solutie este foarte asemanatoare cu lucrarea de fata, cu 
+exceptia capabilitatii de conectare prin Bluetooth pentru procesul de instalare.
+
+Pentru spatii inchise mari Awair ofera o alta solutie care contine unul sau mai multi senzori numiti Awair Omni si un gateway numit Await Net. Senzorul Awair 
+Omni este capabil de realizarea a trei tipuri de conexiuni:
+\begin{itemize}
+	\item Bluetooth - pentru procesul de instalare al senzorului.
+	\item Wi-Fi - pentru utilizarea senzorului Awair Omni in acelasi mod in care este utilizat Awair Element.
+	\item LoRa - pentru comunicatia dintre senzori si gateway.
+\end{itemize}
+Gatewayul Await Net poate fi conectat la internet utilizand un cablu ethernet sau o cartela SIM. Acesta comunica cu senzorii utilizand un protocol de comunicatie 
+proprietar la baza caruia, in nivelul fizic al stivei de comunicatie, se afla tehnica LoRa. Banda de frecventa in care acesta comunica este 868 MHz pentru Europa 
+si 915 MHz pentru Statele Unite. Senzorii au capabilitatea de repetor, ceea ce ofera posibilitatea crearii unei retele mesh. Distanta la care senzorii comunica 
+in linie dreapta fara obstacole este de aproape un kilometru, iar prin capacitatea crearii unei retele mesh aceasta poate fi extinsa. In reteaua mesh fiecare 
+senzor are un nod principal prin care comunica si o lista de cai secundare utilizate in cazul deteriorarii comunicatiei sau a caderii conexiunii cu nodul principal.
+
+Senzorii sunt alimentati de la o sursa de 5V printr-un cablu USB type-C si achizitioneaza urmatoarele metrici de calitate a aerului:
+\begin{itemize}
+	\item Particulele in suspensie PM2.5 si PM10.
+	\item Dioxid de Carbon (CO2).
+	\item Concentratia Compusilor Organici Volatili Totala (TVOC).
+	\item Umiditate.
+	\item Temperatura.
+	\item Lumina ambientala.
+	\item Zgomotul ambiental.
+\end{itemize}
+
+Un al treilea tip de senzor oferit de awair se numeste Glow C, iar scopul acestuia este de integrare cu sistemele existente in locuinte sau in cladirile de birouri 
+care nu suporta o conexiune Wi-Fi. Acest senzor este o extensie de stecher cu o priza care are capabilitatea de conectare Wi-Fi. In priza oferita de senzor poate fi 
+conectat un sistem care nu suporta conexiune Wi-Fi, iar acesta va fi controlat de catre senzor prin pornirea si oprirea alimentarii bazat pe datele de calitate a 
+aerului colectate de acesta. Exemple de astfel de sisteme sunt: un ventilator, un calorifer electric etc. De asemenea, acesta ofera o sursa de lumina LED care isi 
+schima culoarea in functie de calitatea aerului detectat: Verde insemnand o calitatea a aerului buna, portocaliu insemnand o calitate a aerului acceptabila si rosu 
+insemnand o calitate a aerului slaba.
+
+Majoritatea senzorilor oferiti de Awair pot fi integrati cu asistentii virtuali Alexa, Google Home sau IFTTT.
+
+\subsection{Avantaje}\label{subsec:awair_avantaje}
+\begin{itemize}
+	\item Capacitatea de acoperire a unei arii foarte mari datorata utilizarii protocolului LoRa si al capacitatii de creeare a unei retele mesh.
+	\item Integrarea cu sisteme care nu suporta conexiune fara fir.
+\end{itemize}
+
+\section{Solutia Air Quality Egg}\label{sec:airqualityegg}
+\subsection{Descriere}\label{subsec:airqualityegg_descriere}
+Solutia oferita de compania Air Quality Egg este o platforma de dezvoltare destinata persoanelor pasionate de domeniul calitatii aerului. Datele colectate de catre 
+senzorii din intreaga lume sunt disponibile intr-o platforma web oricarei persoane interesate in analiza acestora.
+
+Senzorul, numit The Egg, este format dintr-o platforma hardware ale carei detalii sunt publice si utilizeaza un software care, la randul lui, este public. Aceste 
+informatii sunt publice in scopul dezvoltarii rapide, orice persoana poate oferi solutii la probleme curente sau poate aduce imbunatatiri sistemului. Toti senzorii 
+Egg colecteaza urmatoarele metrici de calitate a aerului: temperatura, umiditate si presiune. Pe langa acestea, la comandarea unui senzor nou este oferita o 
+lista cu metrici suplimentare de calitate a aerului din care pot fi selectate cele dorite de cumparator. Acest lucru inseamna ca Air Quality Egg incepe productia 
+unui senzor doar dupa plasarea unei comenzi, ceea ce face ca durata de receptie a senzorului sa fie mai lunga, aproximativ 4 saptamani.
+
+Figura \ref{fig:sb_airqualityeggmap} prezinta senzorii Egg din intreaga lume. Afiseaza numarul de senzori instalati in fiecare locatie si un cod de culoare care 
+prezinta calitatea aerului raportata de senzorii din locatia respectiva de la foarte buna la foarte slaba. Senzorii Egg care apar gri si transparenti reprezinta 
+senzori care au pierdut conexiunea.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.58]{figs/sb_airqualityeggmap.png}
+    \caption{Harta senzorilor Egg}
+    \label{fig:sb_airqualityeggmap}
+\end{figure}
+
+Aplicatiile web si pentru telefon smart ofera posibilitatea de vizualizare a datelor in timp real si a datelor istorice sub forma grafica sau ca valori de sine 
+statatoare. De asemenea, aceste date sunt acompaniate de un cod de culori. Fiecare culoare corespunde unui interval de valori al indicelui de calitate al 
+aerului (AQI):
+\begin{itemize}
+	\item Intervalul [0, 50] semnifica o calitate a aerului buna si este reprezentata prin culoarea verde.
+	\item Intervalul [51, 100] semnifica o calitate a aerului moderata si este reprezentata prin culoarea galbena.
+	\item Intervalul [101, 150] semnifica o calitate a aerului nesanatoasa pentru persoane sensibile si este reprezentata prin culoarea portocaliu.
+	\item Intervalul [151, 200] semnifica o calitate a aerului nesanatoasa si este reprezentata prin culoarea rosie.
+	\item Intervalul [201, 300] semnifica o calitate a aerului foarte nesanatoasa si este reprezentata prin culoarea mov.
+	\item Intervalul [301, 500] semnifica o calitate a aerului riscanta si este reprezentata prin culoarea maro.
+\end{itemize}
+
+Procesul de instalare si configurare al unui senzor Egg este realizat prin conectarea acestuia la un calculator si utilizarea unei aplicatii oferita de Air 
+Quality Egg. Cu ajutorul acestei aplicatii sunt transmise senzorului informatiile necesare pentru ca acesta sa se conecteze la un router (SSID, parola). De 
+asemenea, aplicatia aceasta poate fi utilizata si pentru colectarea metricilor de calitate a aerului prin portul serial in cazul in care nu se doreste conectarea 
+acestuia la un router. Senzorul este alimentat de la o sursa de 5V prin cablu USB.
+
+Dupa procesul de instalare senzorul va incepe sa transmita datele colectate in serverul cloud si vor fi disponibile in aplicatiile web si de pe telefonul smart.
+
+Platforma hardware a senzorului utilizeaza controlerul de retea CC3000 de la Texax Instruments pentru realizarea conexiunii Wi-Fi si poate contine senzori pentru 
+colectarea metricilor de calitate a aerului prezentate mai jos. Un singur senzor nu poate contine toate aceste metrici, toti senzorii colecteaza metricile pentru 
+temperatura, umiditate si presiune barometrica, iar in functie de urmatoarele metrici alease se poate ca altele sa nu mai poate fi integrate in senzor. De exemplu, 
+daca se alege colectarea metricilor aditionale CO2, SO2 si NO2, nu mai este permisa adaugarea in senzor si a metricilor O3, H2S sau CO.
+\begin{itemize}
+	\item Particulele in suspensie OM1.0, PM2.5 si PM10.
+	\item Dioxid de Carbon (CO2).
+	\item Concentratia Compusilor Organici Volatili Totala (TVOC).
+	\item Umiditate.
+	\item Temperatura.
+	\item Dioxid de sulf (SO2). 
+	\item Ozon (O3).
+	\item Dioxid de Nitrogen (NO2).
+	\item Monoxid de carbon (CO).
+	\item Sulfat de Hidrogen (H2S).
+\end{itemize}
+
+\subsection{Avantaje}\label{subsec:airqualityegg_avantaje}
+\begin{itemize}
+	\item Platforma hardware care poate fi personalizata.
+	\item Vizualizarea si capabilitatea de analizare a datelor raportate de senzorii Egg din intreaga lume.
+\end{itemize}
+\subsection{Dezavantaje}\label{subsec:airqualityegg_dezavantaje}
 
 {\color{blue}\noindent Acest capitol se va extinde pe de la 3 la 10 pagini.\\}
 
@@ -14,7 +195,8 @@ Referințele se scriu în secțiunea Bibliografie.
 
 Formatul referințelor trebuie să fie de tipul IEEE sau asemănător.
 
-Introducerea și formatarea referințelor în bibliografie, respectiv citarea în text, se pot face manual sau folosind instrumentele de lucru menționate în ultimele paragrafe din acest capitol.
+Introducerea și formatarea referințelor în bibliografie, respectiv citarea în text, se pot face manual sau folosind instrumentele de lucru menționate în ultimele 
+paragrafe din acest capitol.
 
 Recomandăm gestiunea referințelor folosind \href{https://www.jabref.org/}{JabRef} care se poate descărca de la \url{https://www.jabref.org/#download}
 
