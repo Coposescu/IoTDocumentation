@@ -6,15 +6,17 @@ In cadrul acestui capitol vor fi prezentate sisteme de monitorizare a calitatii 
 
 Majoritatea sistemelor de monitorizare a calitatii aerului de pe piata in momentul redactarii acestei lucrari nu ofera suport pentru acesarea datelor de 
 la distanta sau accesarea datelor istorice. Acestea sunt concepute cu un ecran mare pe care sunt afisate ultimele valori citite ale metricilor de calitate a 
-aerului acompaniate de culori care codifica anumite intervale de valori de la calitatea aerului foarte buna pana la calitatea aerului foarte slaba si, uneori, 
-de un sunet de alarma atunci cand calitatea aerului este considerata slaba.
+aerului sau grafice pe intervale mici de timp. Aceste metrici sunt acompaniate de culori care codifica anumite intervale de valori de la calitatea aerului 
+foarte buna pana la calitatea aerului foarte slaba si, uneori, de un sunet de alarma atunci cand calitatea aerului este considerata slaba.
 
-In urmatoarele sectiuni sunt prezentate sisteme de monitorizare a calitatii aerului care ofera suport wireless.
+In urmatoarele sectiuni sunt prezentate sisteme de monitorizare a calitatii aerului care au urmatoarele caracteristici: senzorul are capabilitatea de conectare 
+la o retea Wi-Fi, datele sunt gestionate in cloud si aplicatie pe telefonul mobil sau web pentru vizualizarea metricilor colectate de sonzori.
 
 \section{Solutia Airthings}\label{sec:airthingsWavePlus}
 \subsection{Descriere}\label{subsec:airthings_descriere}
 Solutia oferita de compania Airthings se concentreaza pe calitatea aerului in spatii inchise. Aceasta include senzori de calitate a aerului, un gateway si conexiune 
-de la distanta prin intermediul unei aplicatii mobile si a unei pagini web.
+de la distanta prin intermediul unei aplicatii mobile si a unei pagini web. Informatiile continute in acest capitol au fost extrase de pe site-ul oficial de 
+prezentare al companiei Airthings si din manualele de instalare si de depanare puse la dispozitie de acesta \cite{airthings}.
 
 Aceasta solutie poate fi impartita in 2 categorii, conexiune bluetooth si conexiune prin gateway. Conexiunea bluetooth are ca tinta spatiile inchise mici, 
 cum ar fi locuintele care necesita un numar mic de senzori, intre 1 si 3 senzori. Conexiunea prin gateway are ca tinta spatiile inchise mari, cum ar fi cladirile de 
@@ -72,7 +74,8 @@ Plus care colecteaza urmatoarele metrici:
 \subsection{Descriere}\label{subsec:awair_descriere}
 Solutia oferita de compania Awair este asemanatoare cu cea oferita de compania Airthings. Aceasta se concentreaza pe spatii inchise si include senzori de calitate 
 a aerului, un gateway in anumite configuratii de retea, un server in cloud si aplicatie web sau pe telefon pentru gestiunea datelor. Ofera doua tipuri de senzori, 
-unul pentru locuinte si unul pentru cladiri mari, cum ar fi scoli sau cladiri de birouri.
+unul pentru locuinte si unul pentru cladiri mari, cum ar fi scoli sau cladiri de birouri. Informatiile continute in acest capitol au fost extrase de pe site-ul oficial de 
+prezentare al companiei Awair si din manualele de instalare si de depanare puse la dispozitie de acesta \cite{awair}.
 
 Solutia oferita de Awair pentru locuinte este senzorul Awair Element. Acesta este un senzor de sine statator capabil de crearea unei conexiuni prin protocolul 
 Bluetooth sau prin protocolul Wi-Fi. Acesta este destinat pentru utilizarea impreuna cu un router uzual. Conexiunea Bluetooth este utilizata la instalarea senzorului 
@@ -123,7 +126,8 @@ Majoritatea senzorilor oferiti de Awair pot fi integrati cu asistentii virtuali 
 \section{Solutia Air Quality Egg}\label{sec:airqualityegg}
 \subsection{Descriere}\label{subsec:airqualityegg_descriere}
 Solutia oferita de compania Air Quality Egg este o platforma de dezvoltare destinata persoanelor pasionate de domeniul calitatii aerului. Datele colectate de catre 
-senzorii din intreaga lume sunt disponibile intr-o platforma web oricarei persoane interesate in analiza acestora.
+senzorii din intreaga lume sunt disponibile intr-o platforma web oricarei persoane interesate in analiza acestora. Informatiile continute in acest capitol au fost 
+extrase de pe site-ul oficial de prezentare al companiei Air Quality Egg si din manualele de instalare si de depanare puse la dispozitie de acesta \cite{airqualityegg}.
 
 Senzorul, numit The Egg, este format dintr-o platforma hardware ale carei detalii sunt publice si utilizeaza un software care, la randul lui, este public. Aceste 
 informatii sunt publice in scopul dezvoltarii rapide, orice persoana poate oferi solutii la probleme curente sau poate aduce imbunatatiri sistemului. Toti senzorii 
@@ -188,7 +192,8 @@ daca se alege colectarea metricilor aditionale CO2, SO2 si NO2, nu mai este perm
 \subsection{Descriere}\label{subsec:sb_purpleair_descriere}
 Solutia oferita de compania PurpleAir se concentreaza pe impartasirea datelor colectate cu intreaga lume prin platforma oferita de acestia. Ofera patru variante 
 de senzori de calitate a aerului care au capabilitatea de conectare la un server cloud. Trei dintre aceesti senzori sunt destinati pentru spatii inchise, spatii 
-deschise sau domeniul industrial, iar al patrulea este destinat doar pentru spatii inchise.
+deschise sau domeniul industrial, iar al patrulea este destinat doar pentru spatii inchise. Informatiile continute in acest capitol au fost extrase de pe site-ul oficial de 
+prezentare al companiei PurpleAir si din manualele de instalare si de depanare puse la dispozitie de acesta \cite{purpleair}.
 
 Senzorii destinati pentru spatii deschise sau domeniul industrial sunt incapsulati intr-o cutie rezistenta la conditiile meteo din spatiile deschise si la 
 conditiile extreme din domeniul industrial cum ar fi, temperaturi extreme sau umiditate crescuta. Acestia au capabilitatea de functionare fara conexiune Wi-Fi 
@@ -223,12 +228,18 @@ Metricile de calitate a aerului colectate de senzori sunt:
 	\item Presiune.
 	\item Umiditate.
 	\item Temperatura.
-	\item Gaz.
+	\item Gaze.
 \end{itemize}
-Pentru colectarea metricilor OM1.0, PM2.5 si PM10 este utilizat senzorul PMS-x0003 de la Plantowner. Fiecare senzor detinut de AirPurple contine doua 
-unitati PMS-x0003 pentru redundanta, iar pentru colectarea metricilor de presiune, temperatura, umiditate si gaz este utilizat senzorul BME688 de la BOSH. Pentru 
+Pentru colectarea metricilor PM1.0, PM2.5 si PM10 este utilizat senzorul PMS-x0003 de la Plantowner. Fiecare senzor detinut de AirPurple contine doua 
+unitati PMS-x0003 pentru redundanta, iar pentru colectarea metricilor de presiune, temperatura, umiditate si gaze este utilizat senzorul BME688 de la BOSH. Pentru 
 conexiunea Wi-Fi, snezorii utilizeaza controlerul de retea ESP-WROOM-02D de la Espressif Systems. Toti senzorii utilizati in acest paragraf sunt destinati pentru 
 utilizarea in domeniul industrial avand intervalul de temperatura de functionare [-40, +85] grade celsius.
+
+Metricile de presiune, umiditate, temperatura si gaze sunt utilizate pentru calcularea indicelui de calitate al aerului (AQI) dupa standardul creat de Agentia de 
+Protectie a Mediului din Statele Unite.
+
+PurpleAir este integrat cu platforma guvernamentala AirNow care ofera o harta, asemanatoare cu cea oferita de PurpleAir, unde pot fi observate datele colectate 
+de senzori de la mai multe companii printre care si PurpleAir.
 
 \subsection{Avantaje}\label{subsec:sb_purpleair_avantaje}
 \begin{itemize}
@@ -237,48 +248,5 @@ utilizarea in domeniul industrial avand intervalul de temperatura de functionare
 \end{itemize}
 \subsection{Dezavantaje}\label{subsec:sb_purpleair_dezavantaje}
 \begin{itemize}
-	\item Senzorul utilizeaza protocolul HTTP pentru transmisia datelor catre server. Acesta reprezinta un dezavantaj deoarece protocolul HTTP este destinat 
-	pentru transmisia paginilor web si nu este potrivit pentru formatul datelor transmise de senzor.
-	\item Afisarea datelor catre utilizator in format JSON, un format greu de citit de catre utilizator.
+	\item Afisarea datelor catre utilizator in format JSON in anumite moduri de functionare, un format greu de citit de catre utilizator.
 \end{itemize}
-
-{\color{blue}\noindent Acest capitol se va extinde pe de la 3 la 10 pagini.\\}
-
-Documentarea bibliografică are ca obiectiv prezentarea stadiului actual al domeniului sau sub-domeniului în care se situează tema.
-În redactarea acestui capitol (în general a întregului document) se va ține cont de cunoștințele acumulate la disciplinele dedicate din semestrul 2, anul 4
-(Metodologia Întocmirii Proiectelor, etc.), precum și la celelalte discipline relevante temei abordate.
-
-
-Referințele se scriu în secțiunea Bibliografie.
-
-Formatul referințelor trebuie să fie de tipul IEEE sau asemănător.
-
-Introducerea și formatarea referințelor în bibliografie, respectiv citarea în text, se pot face manual sau folosind instrumentele de lucru menționate în ultimele 
-paragrafe din acest capitol.
-
-Recomandăm gestiunea referințelor folosind \href{https://www.jabref.org/}{JabRef} care se poate descărca de la \url{https://www.jabref.org/#download}
-
-Forma referințelor bibliografice pe categorii de referințe o puteți găsi \href{https://libguides.nps.edu/citation/ieee-bibtex}{aici}.
-
-Despre erori comune de formatare ale referințelor din bibliotecile online puteți citi \href{https://www.ece.ucdavis.edu/~jowens/biberrors.html}{aici}
-
-
-In capitolul~\ref{ch:analysis} din~\cite{strunk}, care tratează valoarea honeypots, Spitzner prezintă avantajele și dezavantajele acestor sisteme.
-
-
-În secțiunea \textit{Bibliografie} sunt exemple de referințe pentru articol la conferințe sau seminarii~\cite{BellucciLZ04}, articol în jurnal~\cite{AntoniouSBDB07},
-sau cărți~\cite{russell1995artificial}.
-
-
-Referințele spre aplicații sau resurse online (pagini de internet) trebuie sa includă cel puțin o denumire sugestivă pe lâ ngă link-ul propriu-zis~\cite{webpage},
-plus alte informații dacă sunt disponibile (autori, an, etc.).
-Referințele care prezintă doar link spre resursa online se vor plasa în subsolul paginii unde sunt referite.
-Citarea referințelor în text este obligatorie, vezi exemplul de mai jos (în funcție de tema proiectului se poate varia modul de prezentare a metodei/aplicației).
-
-%În articolul~\cite{AntoniouSBDB07} autorii prezintă un sistem pentru ...
-În~\cite{AntoniouSBDB07} autorii prezintă un sistem pentru detecția obstacolelor în mișcare folosind stereo viziune și estimarea mișcării proprii.
-Metoda se bazează pe ...{\it trecerea în revistă a algoritmilor, structurilor de date, funcționalitate, aspecte specifice temei proiectului etc}. Discuție {\it avantaje - dezavantaje}.
-
-
-\textit{De exemplu:} În capitolul numit "Problem-solving" din lucrarea~\cite{russell1995artificial} se prezintă ...
-
