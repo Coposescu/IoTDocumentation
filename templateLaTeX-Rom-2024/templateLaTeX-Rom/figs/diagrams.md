@@ -278,11 +278,16 @@ class ActivityWelcome {
     +updateMetrics()
 }
 class ActivitySensor {
-    -chartTemperature
-    -chartHumidity
+    -gridView : GridView
+    -metricsGridList : Arrayist<MetricItems>
     +updateMetrics()
-    +chartInitTemperatureData()
-    +chartInitHumidityData()
+}
+class ActivityChart {
+    -gridView : GridView
+    -chartList : ArrayList<ChartItemS>
+    -chartType
+    +updateMetrics()
+    +chartGetData()
 }
 class ScheduledDataAcquisition <<Runnable>> {
     -mqttClient : MQTTClient
@@ -341,7 +346,9 @@ ActivityWelcome --|> ScheduledDataAcquisition
 ActivityWelcome --|> SensorListItem
 
 ActivitySensor ....|> Listener
-ActivitySensor --|> DBAPIClient
+
+ActivityChart ....|> Listener
+ActivityChart --|> DBAPIClient
 
 DBAPIClient --|> DBAPIInterface
 DBAPIInterface --|> SensorReadingsList
@@ -373,56 +380,48 @@ UIThreadHandler o-- Listener
 ```
 
 # JSON data format from MQTT Broker to Android
-MQTT message 1: {"temperature":28.380}
-MQTT message 2: {"humidity":59.912}
+{  
+  "Temperature" : 29.468,  
+  "Humidity" : 59.301,  
+  "PM1.0" : 30.597,  
+  "PM2.5" : 32.356,  
+  "PM4.0" : 32.356,  
+  "PM10.0" : 32.356,   
+  "TPS" : 446,  
+  "VOCIndex" : 316  
+}  
 
 # JSON data format from RESTful Server to Android
- {
-     "list": [
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.846,
-             "timestamp": "2024-07-08T15:00:03.877000Z"
-         },
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.846,
-             "timestamp": "2024-07-08T15:00:22.911000Z"
-         },
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.846,
-             "timestamp": "2024-07-08T15:00:42.256000Z"
-         },
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.749,
-             "timestamp": "2024-07-08T15:01:01.619000Z"
-         },
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.547,
-             "timestamp": "2024-07-08T15:01:20.949000Z"
-         },
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.45,
-             "timestamp": "2024-07-08T15:01:40.300000Z"
-         },
-         {
-             "sensorMAC": "F8F005ADB2A9",
-             "type": "humidity",
-             "value": 61.322,
-             "timestamp": "2024-07-08T15:01:59.647000Z"
-         }
-     ]
- }
+{  
+    "list": [  
+        {  
+            "sensorMAC": "F8F005ADB2A9",  
+            "type": "airQ1",  
+            "Temperature": 30.002,  
+            "Humidity": 56.854,  
+            "PM1.0": 29.595,  
+            "PM2.5": 31.382,  
+            "PM4.0": 31.455,  
+            "PM10.0": 31.49,  
+            "TPS": 457.0,  
+            "VOCIndex": 142.0,  
+            "timestamp": "2024-08-16T16:50:52.880000Z"  
+        },  
+        {  
+            "sensorMAC": "F8F005ADB2A9",  
+            "type": "airQ1",  
+            "Temperature": 30.022,  
+            "Humidity": 56.854,  
+            "PM1.0": 30.336,  
+            "PM2.5": 32.08,  
+            "PM4.0": 32.081,  
+            "PM10.0": 32.082,  
+            "TPS": 452.0,  
+            "VOCIndex": 141.0,  
+            "timestamp": "2024-08-16T16:51:12.227000Z"  
+        }  
+	]  
+}  
 
  # MQTT Broker internal architecture
 
@@ -446,13 +445,20 @@ mosquitto <-- subscriber: Subscribe for #
 ```
 
 # PI MongoDB Document Example 
-sensorReadings> db.readings.findOne()
-{
-    timestamp: ISODate('2024-06-05T12:54:03.085Z'),
-    metadata: { sensorMAC: 'F8F005ADB2A9', type: 'temperature' },
-    value: 27.514,
-    _id: ObjectId('66605febb0abead3d2c8f28a')
-}
+sensorReadings> db.readings.findOne({})  
+{  
+  timestamp: ISODate('2024-08-16T13:28:41.849Z'),  
+  metadata: { sensorMAC: 'F8F005ADB2A9', type: 'airQ1' },  
+  'PM2.5': 19.96,  
+  _id: ObjectId('66bf5409878dda90726c34a2'),  
+  'PM1.0': 18.875,  
+  VOCIndex: 100,  
+  TPS: 418,  
+  'PM4.0': 19.96,  
+  Humidity: 56.689,  
+  Temperature: 29.75,  
+  'PM10.0': 19.96  
+}  
 
 # PI - Sensor Unit Diagram
 
@@ -460,7 +466,7 @@ sensorReadings> db.readings.findOne()
 @startuml
 skinparam shadowing true
 left to right direction
-skinparam linetype ortho
+skinparam linetype poli
 
 component artyz7 as "Arty Z7" {
     !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
@@ -483,10 +489,24 @@ component hygro as "Pmod HYGRO" {
     FA6_TEMPERATURE_HIGH(hdc1080, HDC1080)
 }
 
-wincxpro <----> artyz7 : SPI
-wincxpro <---- artyz7 : RESET_N
-wincxpro ----> artyz7 : IRQ
-artyz7 <---> hygro : I2C
+component sgp40 as "VOCSensor" {
+    rectangle voc as "SPS40"
+}
+
+component sps30 as "ParticulateMatterS" {
+    !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+    !include $ICONURL/common.puml
+    !include $ICONURL/material/blur_on.puml
+    MATERIAL_BLUR_ON(_sps30, SPS30)
+}
+
+wincxpro <---> artyz7 : SPI
+wincxpro <--- artyz7 : RESET_N
+wincxpro ---> artyz7 : IRQ
+artyz7 <--> hygro : I2C
+artyz7 <--> sps30 : I2C
+hygro <--> sgp40 : I2C
+
 
 
 @enduml

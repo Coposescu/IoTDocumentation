@@ -1,29 +1,29 @@
 \chapter{Obiectivele proiectului}\label{ch:obiective}
 \pagestyle{fancy}
-Obiectivul acestui proiect este de a oferi utilizatorului un sistem precis si scalabil pentru monitorizarea in timp real a parametrilor de temperatura si 
-umiditate dintr-un mediu. Sistemul integreaza achizitia de date precise de la senzori cu utilizarea unor protocoale de incredere pentru comunicarea si 
-stocarea datelor care, in final, sunt puse la dispozitia utilizatorului intr-o platforma de vizualizare si control al datelor usor accesibila. Platforma este 
-bazata pe sistemul de operare Android si poate fi accesata de la distanta din orice locatie in care internetul este accesibil. De asemenea, platforma ofera 
-o reprezentare grafica a datelor din trecut pentru a facilita analiza acestora.
+Obiectivul acestui proiect este de a oferi utilizatorului un sistem precis si scalabil pentru monitorizarea in timp real a parametrilor de calitate a 
+aerului dintr-un mediu. Sistemul integreaza achizitia de date precise de la senzori cu utilizarea unor protocoale de incredere pentru comunicarea si 
+stocarea datelor care, in final, sunt puse la dispozitia utilizatorului intr-o platforma de vizualizare si control al datelor usor accesibila. 
+Platforma este bazata pe sistemul de operare Android si poate fi accesata de la distanta din orice locatie in care internetul este accesibil. 
+De asemenea, platforma ofera o reprezentare grafica a datelor din trecut pentru a facilita analiza acestora.
 
 \section{Cerinte functionale}\label{sec:cerinte_functionale}
 \subsection{Interfata cu utilizatorul}\label{subsec:cf_interfata}
 \begin{itemize}
-    \item utilizatorul trebuie sa poata instala senzori noi
-    \item utilizatorul trebuie sa poata sterge un senzor din lista 
-    \item utilizatorul trebuie sa fie ghidat in timpul instalarii unui nou senzor cu sfaturi si informatii utile
-    \item utilizatorul trebuie sa poata vizualiza toti senzorii instalati sub forma de lista
-    \item utilizatorul trebuie sa poata accesa la alegere un senzor din lista si sa obtina informatii despre acesta
-    \item fiecare senzor trebuie sa afiseze statusul conectivitatii in dreptul numelui direct in lista
-    \item fiecare senzor trebuie sa aiba pagina lui proprie in care sunt afisate detaliile acestuia si datele achizitionate 
-    \item datele de temperatura si umiditate trebuie actualizate in timp real si trebuie sa afiseze unitatea de masura specifica fiecarei valori
-    \item datele istorice trebuie afisate sub forma grafica
-    \item utilizatorul trebuie sa poata vizualiza marcajul temporal si valorile exacte ale metricilor prin selectarea unui punct din grafic.
-    \item utilizatorul trebuie sa poata alege perioada pe care vizualiza datele in grafic
-    \item utilizatorul trebuie sa poata alege intervalul de achizitionare al datelor
-    \item utilizatorul trebuie sa poata seta parametrii de receptie ai alarmelor
-    \item utilizatorul trebuie sa poata reseta senzorul la setarile din fabrica prin mentinerea apasata a unui buton timp de 10 secunde 
-    \item senzorul trebuie sa ofere o lumina led care sa indice statusul lui pe parcursul instalarii.
+    \item Utilizatorul trebuie sa poata instala senzori noi.
+    \item Utilizatorul trebuie sa poata sterge un senzor din lista.
+    \item Utilizatorul trebuie sa fie ghidat in timpul instalarii unui nou senzor cu sfaturi si informatii utile.
+    \item Utilizatorul trebuie sa poata vizualiza toti senzorii instalati sub forma de lista.
+    \item Utilizatorul trebuie sa poata accesa la alegere un senzor din lista si sa obtina informatii despre acesta.
+    \item Fiecare senzor trebuie sa afiseze statusul conectivitatii in dreptul numelui direct in lista.
+    \item Fiecare senzor trebuie sa aiba pagina lui proprie in care sunt afisate detaliile acestuia si datele achizitionate.
+    \item Datele de calitate a aerului trebuie actualizate in timp real si trebuie sa afiseze unitatea de masura specifica fiecarei valori.
+    \item Datele istorice trebuie afisate sub forma grafica.
+    \item Utilizatorul trebuie sa poata vizualiza marcajul temporal si valorile exacte ale metricilor prin selectarea unui punct din grafic.
+    \item Utilizatorul trebuie sa poata alege perioada pe care vizualiza datele in grafic.
+    \item Utilizatorul trebuie sa poata alege intervalul de achizitionare al datelor.
+    \item Utilizatorul trebuie sa poata seta parametrii de receptie ai alarmelor.
+    \item Utilizatorul trebuie sa poata reseta senzorul la setarile din fabrica prin mentinerea apasata a unui buton timp de 10 secunde.
+    \item Senzorul trebuie sa ofere o lumina led care sa indice statusul lui pe parcursul instalarii.
 \end{itemize}
 
 \subsection{Transmiterea datelor}\label{subsec:cf_transmitere}
@@ -46,9 +46,9 @@ utilizarea protocolului de comunicatie MQTT specializat pe timpul de raspuns scu
 
 In cazul afisarii datelor din trecut, timpul de raspuns al sistemului este compus din durata de transmisie a unei cereri, procesarea acesteia si returnarea
 datelor cerute. Sistemul asigura o durata scurta de raspuns prin controlul debitului datelor. Acest control este realizat prin afisarea grafica a metricilor
-de temperatura si umiditate care presupune afisarea unei serii restranse de date, de exemplu, datele care au fost acumulate in 12 ore.
+de calitate a aerului care presupune afisarea unei serii restranse de date, de exemplu, datele care au fost acumulate in 12 ore.
 
-Latenta sistemului este definita de perioada dintre inceputul achizitiei temperaturii si a umiditatii si afisarea datelor in aplicatia Android. Pentru 
+Latenta sistemului este definita de perioada dintre inceputul achizitiei datelor de calitate a aerului si afisarea acestora in aplicatia Android. Pentru 
 monitorizarea datelor atat in timp real cat si istorice aceasta metrica este foarte importanta, deoarece o schimbare radicala in valorile extrase din mediu 
 nu mai este relevanta daca de la momentul in care a fost extrasa si pana la momentul in care utilizatorul o observa a trecut mult timp.
 

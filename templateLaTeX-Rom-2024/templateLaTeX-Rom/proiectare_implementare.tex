@@ -1,8 +1,8 @@
 \chapter{Proiectare de detaliu și implementare}
 \pagestyle{fancy}
 
-Acest capitol prezinta in detaliu solutia propusa pentru un sistem de monitorizare a temperaturii si a umiditatii. Aceasta include protocoalele de 
-comunicatie utilizate, limbajele de programare si arhitecturi de abstractizare.
+Acest capitol prezinta in detaliu solutia propusa pentru un sistem de monitorizare a calitatii aerului. Aceasta include protocoale de 
+comunicatie, limbaje de programare, arhitecturi de abstractizare si senzorii utilizati pentru masurarea indicilor de calitate a aerului.
 
 Arhitectura generala a sistemului este compusa din 5 componente pricipale interconectate pentru a crea o retea bine definita si cu o flexibilitate
 ridicata:
@@ -39,20 +39,21 @@ In sistemul de operare Android clasele care definesc o interfata grafica sunt de
 care are sarcina de a afisa interfetele grafice si de a gestiona actiunile utilizatorului, de exemplu, apasare de buton. Fiecare clasa de tip activitate extinde 
 clasa AppCompatActivity care ofera componente pentru afisarea grafica si metode callback pentru gestionarea navigarii intre mai multe activitati. 
 
-Aplicatia este compusa din 2 activitati principale si cateva secundare:
-\begin{enumerate}
+Aplicatia este compusa din 3 activitati principale si o serie de activitati care au scopul de ghidare a utilizatorului prin procesul de instalare:
+\begin{itemize}
 	\item ActivityWelcome - reprezinta activitatea care este afisata la deschiderea aplicatiei.
 	\item ActivitySensor - reprezinta activitatea care este afisata atunci cand utilizatorul selecteaza un senzor din lista.
+	\item ActivityChart - reprezinta activitatea in care sunt afisate grafic datele de la senzor.
 	\item ActivityInstall - reprezinta un grup de activitati secundare afisate atunci cand utilizatorul instaleaza un senzor nou. Fiecare dintre aceste 
 	activitati reprezinta un pas din procesul de instalare.
-\end{enumerate}
+\end{itemize}
 
 \
 
 Figura \ref{fig:AndroidClassDiagram} prezinta diagrama de clase a aplicatiei Android.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.64]{figs/AndroidClassDiagram.png}
+    \includegraphics[scale=0.68]{figs/AndroidClassDiagram.png}
     \caption{Arhitectura generala a proiectului}
     \label{fig:AndroidClassDiagram}
 \end{figure}
@@ -90,8 +91,8 @@ diferite evenimente in tranzactionarea cu modulul MQTT Broker. Mai jos sunt enum
 	\item Connectarea cu success la modulul MQTT Broker - cand are loc acest eveniment se executa rutina de subscriere pentru receptionarea in timp real a datelor de la 
 	senzor.
 	\item Pierderea conexiunii - acest eveniment va modifica statusul conexiunii din lista de senzori a-i activitatii ActivityWelcome si din ActivitySensor.
-	\item Receptia unui mesaj - acest eveniment va apela metoda notifyListeners() a obiectului UIThreadHandler care va actualiza ultima valoare de temperatura si 
-	umiditate afisata in activitatile ActivityWelcome si ActivitySensor. De asemenea, acest eveniment va verifica si statusul conexiunii senzorului si il va schimba 
+	\item Receptia unui mesaj - acest eveniment va apela metoda notifyListeners() a obiectului UIThreadHandler care va actualiza ultimele valori ale indicilor de 
+    calitate a aerului afisate in activitati. De asemenea, acest eveniment va verifica si statusul conexiunii senzorului si il va schimba 
 	daca este cazul.
 \end{itemize}
 
@@ -112,11 +113,14 @@ notifyListeners() a obiectului UIThreadHander. Aceasta metoda parcurge lista de 
 apelata direct, ci prin obiectul Handler care primeste ca parametru o rutina de tip Runnable si care este pus intr-o coada de executie a interfetei grafice.
 
 La selectarea unui element din lista de senzori afisata in activitatea ActivityWelcome este creata activitatea ActivitySensor. Rolul acesteia este de a prezenta informatiile 
-senzorului selectat si datele de temperatura si umiditate ale acestuia sub forma grafica si sub forma a 2 campuri care contin doar ultima valoare receptionata. La creare 
-se citeste din obiectul Intent primit de la activitatea ActivityWelcome informatiile senzorului intr-un obiect SensorListItem, se afiseaza informatiile senzorului in 
-interfata grafica, se initializeaza graficele de temperatura si umiditate si se interogheaza baza de date pentru valorile din ultimele 10 minute. La primirea valorilor 
-citite din baza de date, acestea sunt scrise in graficul de temperatura, respectiv umiditate. Daca nu exista date in ultimele 10 minute inseamna ca senzorul nu este conectat, iar 
-statusul acestuia este modificat corespunzator. 
+senzorului selectat si ultimele valori ale indicilor de calitate a aerului primite de la acesta sub forma unei grile care are 2 coloane si mai multe randuri. La creare 
+se citesc din obiectul Intent primit de la activitatea ActivityWelcome informatiile senzorului intr-un obiect SensorListItem si se afiseaza informatiile senzorului in 
+interfata grafica. 
+
+La apasarea oricarui element din grila in care sunt prezentate ultimele valori citite de la sonzor se va deschide activitatea ActivityChart. Aceasta activitate are rolul 
+de a afisa indicii de calitate a aerului sub forma grafica. La crearea activitatii se initializeaza cate un grafic pentru fiecare metrica si se interogheaza baza de date 
+pentru valorile din ultimele 10 minute. La primirea valorilor citite din baza de date, acestea sunt procesate si afisate in graficul corespunzator. Daca nu exista date 
+in ultimele 10 minute inseamna ca senzorul nu este conectat, iar statusul acestuia este modificat corespunzator.
 
 Pentru interogarea bazei de date este utilizata biblioteca Retrofit a carei functionalitate teoretica este descrisa in sectiunea \ref{sec:retrofit}. Pentru implementarea 
 rutinelor de interogare a bazei de date utilizand aceasta biblioteca sunt utilizate urmatoarele clase din figura \ref{fig:AndroidClassDiagram}:
@@ -149,7 +153,7 @@ Python.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{figs/MQTTBrokerInside.png}
-    \caption{Formatul datelor transmise de modulul MQTT Broker catre Android}
+    \caption{Arhitectura interna a modulului MQTTBroker}
     \label{fig:MQTTBrokerInside}
 \end{figure}
 
@@ -168,12 +172,11 @@ sau alarmele transmise intre aplicatia Android si senzor nu vor fi interceptate 
 Pentru implementarea aplicatiei Python este utilizata biblioteca "paho.mqtt.cient". Aceasta ofera rutine ajutatoare pentru crearea unui client cu rol de abonator sau publicator 
 intr-o retea MQTT. De asemenea, ofera rutine de callback care permit realizarea anumitor actiuni atunci cand au loc evenimente precum receptia unui mesaj, connectarea cu 
 success, subscriptia cu success etc. La receptia unui mesaj de la Broker se creeaza o cerere HTTP cu metoda POST care este transmisa catre modulul RESTful Server pentru 
-salvarea datelor in baza de date. De la senzor se primeste metrica si valoarea acesteia intr-un format JSON, \ref{fig:Mqtt2AndroidDataFormat} prezinta acest format. Este de 
-datoria aplicatiei sa extraga adresa MAC a senzorului din topic si sa adauge o unitate de timp in fus orar UTC la datele receptionate inainte de transmisia lor catre baza de 
-date.
+salvarea datelor in baza de date. De la senzor este primit un mesaj care contine toti indicii de calitate a aerului intr-un format JSON, figura 
+\ref{fig:Mqtt2AndroidDataFormat} prezinta acest format. Este de datoria aplicatiei sa extraga adresa MAC a senzorului din topic si sa adauge o unitate de timp in 
+fus orar UTC la datele receptionate inainte de transmisia lor catre baza de date.
 
-Figura \ref{fig:Mqtt2AndroidDataFormat} prezinta formatul JSON al datelor transmise de catre senzor si retransmise de catre Broker inspre aplicatia Android si baza de date. 
-Sunt trimise 2 mesaje separate, unul pentru temperatura si unul pentru umiditate. 
+Figura \ref{fig:Mqtt2AndroidDataFormat} prezinta formatul JSON al mesajului transmis de catre senzor si retransmis de catre Broker inspre aplicatia Android si baza de date.  
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{figs/Mqtt2AndroidDataFormat.png}
@@ -201,8 +204,8 @@ Fisierul sensor\_data\_routes.py reprezinta punctul de intrare in aplicatie. Ace
 sub forma de resurse. O adresa URL identifica unic o resursa sau o clasa model. Orice cerere HTTP care vine din retea, de la aplicatia Android sau de la modulul MQTT Broker, 
 vor fi validate in acest modul pe baza andresei URL.
 
-Fisierul sensor\_data\_controller.py reprezinta punctul de control al aplicatiei. Acesta primeste de la modulul Routes resursa care se doreste a fi accesata din baza de date, 
-identifica metoda HTTP si argumentele acesteia, valideaza aceste informatii si transmite catre modulul Model interogarea specifica resursei. La returnarea datelor de catre 
+Fisierul sensor\_data\_controller.py reprezinta punctul de control al aplicatiei. Acesta primeste de la modulul Routes resursa care va fi accesata din baza de date, 
+identifica metoda HTTP si argumentele acesteia, valideaza aceste informatii si transmite catre modulul Model interogarea specifica resursei. La primirea datelor de la 
 modulul Model, acesta va transmite catre modulul View datele receptionate pentru a fi formatate corespunzator, iar apoi va transmite raspunsul catre entitatea care a transmis 
 cererea.
 
@@ -213,10 +216,10 @@ Fisierul sensor\_data\_view.py reprezinta modulul View al aplicatiei. Acesta are
 efectuat cererea il cunoaste, si anume formatul GSON. 
 
 Figura \ref{fig:Server2AndroidDataFormat} prezinta formatul JSON al datelor trimise catre aplicatia Android de la modulul Server in urma unei interogari a bazei de 
-date pentru valorile de umiditate dintr-o anumita perioada. Raspunsul prezentat contine o lista cu 3 citiri diferite.
+date pentru valorile de calitate a aerului dintr-o anumita perioada. Raspunsul prezentat contine o lista cu 2 citiri.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.8]{figs/Server2AndroidDataFormat.png}
+    \includegraphics[scale=0.7]{figs/Server2AndroidDataFormat.png}
     \caption{Exemplu de raspuns la o interogare a bazei de date}
     \label{fig:Server2AndroidDataFormat}
 \end{figure}
@@ -255,47 +258,48 @@ la un moment de timp. Structura unui document contine urmatoarele campuri:
     fusul orar si caracterele utilizate pentru delimitarea acestora.
 	\item Campul "metadata" - reprezinta informatii despre senzor si despre datele continute in document. Acest camp ar trebui sa contina elemente care se schimba 
 	foarte rar sau niciodata. De asemenea, elementele pe baza carora se fac interogarile in baza de date trebuie sa fie continute in acest camp pentru a beneficia 
-    de eficienta maxima. Acest camp contine adresa MAC a senzorului si tipul metricii venite de la senzor. 
-	\item Campul "value" - reprezinta valoarea metricii venita de la senzor. De exemplu, temperatura in grade celsius.
+    de eficienta maxima. Acest camp contine adresa MAC a senzorului si tipul de senzor. 
+	\item Campurile "PM2.5", "PM1.0", "VOCIndex", "TPS", "PM4.0", "Humidity", "Temperature", "PM10.0" - reprezinta indicii de calitate a aerului trimis de catre senzor.  
+    In dreptul acestor indici se afla valorile corespunzatoare. De exemplu, temperatura in grade celsius.
 	\item Campul "\_id" - reprezinta un sir de caractere generat automat la memorarea documentului care identifica unic acest document.
 \end{itemize}
 
 Figura \ref{fig:PI_AggregationExample} prezinta operatia de agregare utilizata pentru extragerea documentelor care se afla intr-un anumit interval de timp. Prima 
 operatie efectuata este "\$match" care va selecta din baza de date toate documentele care se afla intr-un anumit interval de timp. A doua operatie efectuata este 
-tot operatia "\$match" care va selecta din documentele care au indeplinit conditia primei operatii, doar documentele caare au o anumita adresa MAC si care contin 
+tot operatia "\$match" care va selecta din documentele care au indeplinit conditia primei operatii, doar documentele care au o anumita adresa MAC si care contin 
 un anumit tip de valori, cum ar fi valori de umiditate. A treia operatie este "\$sort" care va aranja documentele care au indeplinit conditiile celei de-a doua 
 operatii in ordine cronologica. Ordinea acestor operatii este foarte importanta pentru cresterea eficientei. S-a ales operatia de selectare a intervalului de timp 
 ca prima operatie, deoarece este operatia cea mai putin costisitoare de efectuat pe intreaga baza de date. Astfel, setul de documente pe care se efectueaza celelalte 
 doua operatii, care sunt mult mai costisitoare, este diminuat semnificativ.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.8]{figs/PI_AggregationExample.png}
+    \includegraphics[scale=0.7]{figs/PI_AggregationExample.png}
     \caption{Exemplu de operatie de agregare}
     \label{fig:PI_AggregationExample}
 \end{figure}
 
 \section{Senzor}\label{sec:pi_senzor}
-Acest modul este compus din doua componente principale, un dispozitiv care are capabilitatile de a esantiona date de temperatura si umiditate si de a comunica 
+Acest modul este compus din doua componente principale, un dispozitiv care are capabilitatile de a esantiona indici de calitate a aerului si de a comunica 
 printr-un mediu fara fir si un router care realizeaza legatura dintre reteaua locala si internet. Rolul acestui modul este de a realiza o conexiune cu un router,
-de a achizitiona date de temperatura si umiditate si de a le transmite catre aplicatia Android. 
+de a achizitiona date de calitate a aerului si de a le transmite catre aplicatia Android. 
 
-Pentru realizarea senzorului s-a utilizat platforma de dezvoltare Arty Z7 la care este conectat un controller de retea ATWINC1500 si senzorul de temperatura 
-si umiditate HDC1080. Pentru realizarea schemei arhitecturale a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3, iar pentru dezvoltarea codului sursa 
-in limbajul de programare C a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3.
+Pentru realizarea senzorului s-a utilizat platforma de dezvoltare Arty Z7 la care este conectat un controller de retea ATWINC1500, senzorul de temperatura 
+si umiditate HDC1080, senzorul pentru compusii organici volatili SGP40 si senzorul pentru particulele in suspensie SPS30. Pentru realizarea schemei arhitecturale a fost 
+utilizat mediul de dezvoltare Xilinx Vivado 2018.3, iar pentru dezvoltarea codului sursa in limbajul de programare C a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3.
 
-Figura \ref{fig:PI_SensorUnitDiagram} prezinta arhitectura modulului de achizitionare de temperatura si umiditate.
+Figura \ref{fig:PI_SensorUnitDiagram} prezinta arhitectura modulului de achizitionare a indicilor de calitate a aerului.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.8]{figs/PI_SensorUnitDiagram.png}
-    \caption{Arhitectura senzorului de temperatura si umiditate}
+    \includegraphics[scale=0.5]{figs/PI_SensorUnitDiagram.png}
+    \caption{Arhitectura modulului Senzor}
     \label{fig:PI_SensorUnitDiagram}
 \end{figure}
 
 \subsection{Platforma de dezvoltare Arty Z7}\label{subsec:artyz7_platform}
 Nucleul platformei de dezvoltare Arty Z7 este sistemul integrat Zynq7000 \cite{zynq7000ug585}, avand o multitudine de porturi si componente periferice pentru adaptarea la diferite 
-priecte. De pe aceasta platforma sunt utilizate cele doua porturi pmod pentru conectarea senzorului HDC1080 si a controllerului de retea ATWINC1500, sistemul 
-integrat Zynq7000 reprezentand unitatea de control al tututor perifericelor de pe platforma si portul MicroUSB utilizat pentru alimentarea cu 5 volti si pentru 
-comunicatia cu un calculator personal prin interfata de comunicare UART.
+proiecte. De pe aceasta platforma sunt utilizate cele doua porturi pmod si 5 pini de pe conectorii J2 si J7. Senzorii HDC1080 si SGP40 sunt conectati la portul pmodB, controllerul 
+de retea ATWINC1500 este conectat la portul pmodA, iar senzorul SPS30 este conectat la conectorii J2 si J4. Sistemul integrat Zynq7000 reprezinta unitatea de control al tututor 
+perifericelor de pe platforma si a portului MicroUSB utilizat pentru alimentarea cu 5 volti si pentru comunicatia cu un calculator personal prin interfata de comunicare UART.
 
 Arhitectura interna a sistemului integrat Zynq7000 este formata dintr-un procesor de tip ARM Cortex-A9 cu doua nuclee si partea logica FPGA 7-series. Proiectul 
 de fata utilizeaza procesorul ARM Cortex-A9 pentru crearea unui microcontroller si partea logica pentru conectarea porturilor necesare la microcontroller. 
@@ -308,7 +312,7 @@ multiplexorului de intrari si iesiri al procesorului.
 Figura \ref{fig:PI_ZynqBlockDesign} prezinta interconexiunea dintre procesor si porturile periferice.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.68]{figs/PI_ZynqBlockDesign.png}
+    \includegraphics[scale=0.6]{figs/PI_ZynqBlockDesign.png}
     \caption{Diagrama de proiectare}
     \label{fig:PI_ZynqBlockDesign}
 \end{figure}
@@ -319,8 +323,11 @@ doar la tranzitia din 0 logic in 1 logic. Porturile a caror denumire incep cu "S
 de retea ATWIN1500, iar portul "GPIO" reprezinta semnalul de reset al modulului ATWINC1500 care, la fel ca semnalul de intrerupere, este activ in 0 logic. Aceste 
 semnale sunt legate la portul PMODA (JA) de pe platforma Arty Z7.
 
-Portul "IIC\_0\_0" reprezinta semnalele protocolului I2C utilizat in comunicatia cu senzorul de temperatura si umiditate HDC1080. Aceste semnale sunt legate pe 
-portul PMODB (JB) de pe platforma Arty Z7.
+Portul "IIC\_0\_0" reprezinta semnalele primei magistrale I2C utilizate in comunicatia cu senzorii HDC1080 si SPG40. Acesti senzori sunt conectati la aceeasi magistrala I2C. 
+Aceste semnale sunt legate pe portul PMODB (JB) de pe platforma Arty Z7.
+
+Portul "IIC\_1\_0" reprezinta semnalele celei de-a doua magistrale I2C utilizate in comunicatia cu senzorul SPS30. Aceste semnale sunt legate la conectorii J2 si J7 
+de pe platforma ArtyZ7.
 
 Porturile "DDR" si "FIXED\_IO" sunt generate automat la crearea unitatii de procesare. Portul "DDR" realizeaza conexiunea dintre procesorul ARM Cortex-A9 si memoria 
 externa DDR utilizata la incarcarea si executarea codului sursa, iar portul "FIXED\_IO" reprezinta semnalele de intrare/iesire ale perifericelor utilizate. De exemplu 
@@ -347,7 +354,8 @@ necesare functionarii aplicatiei, si anume, doua module timer care numara la mil
 multiplicata cu un factor de 16, obtinand astfel o frecventa a sursei de ceas de 400Mhz.
 
 Figura \ref{fig:PI_SDKFileStructure} prezinta structura fisierelor proiectului in mediul de programare Xilinx SDK. Fiecare director reprezinta un modul al proiectului 
-si contine fisere asociate cu denumirea acestuia.
+si contine fisere asociate cu denumirea acestuia. Structura fisierelor a fost impartita in doua imagini asezate in paralel pentru a reduce inaltimea acesteia. Fisierele 
+prezentate in imaginea din dreapta se afla sub directorul "src" exceptand fisierele "main.c" si "lscript.ld".
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.66]{figs/PI_SDKFileStructure.png}
@@ -357,6 +365,21 @@ si contine fisere asociate cu denumirea acestuia.
 
 Driverul generat automat de catre mediul de dezvoltare Xilinx SDK se afla intr-un proiect separat numit "Zynq7000\_atwinc\_sdk\_bsp". Acest proiect este generat automat 
 bazat pe fisierul ".hdf" exportat de mediul de dezvoltare Vivado.
+
+Directorul "Application" contine fisiere sursa si antet specifice aplicatiei. Fisierul "acquisition.c" contine rutine pentru initializarea si gestionarea achizitiei 
+de date de la senzorul de temperatura si umiditate HDC1080. Acesta contine o masina de stari care initiaza o noua achizitie de date, asteapta finalizarea acesteia, 
+converteste valorile obtinute in sir de caractere si gestioneaza posibilele erori. Fisierul "acquisition.h" contine declaratia starilor masinii de stari si a 
+variabilelor si functiilor utilizate de fisiere externe. Fisierul "publish.c" este responsabil cu calcularea urmatorului moment in care se va transmite un pachet,
+de creearea pachetului si adaugarea acestuia in coada. Fisierul "app.c" contine masina de stare generala a aplicatiei, functii de tip handler care gestioneaza 
+evenimentele care au loc in retea, masina de stare pentru resetarea dispozitivului la setarile din fabrica si defineste o coada de mesaje si rutinele necesare 
+pentru gestiunea acesteia, adaugare pachet, extragere pachet, stergere pachet. 
+
+Directorul "atwinc15x0" reprezinta driverul pentru controlerul ATWINC1500 oferit de organizatia Microchip sub licenta libera. Driverul este inclus in libraria 
+"mla", Microchip Libraries for Applications, si poate fi descarcat de pe site-ul oficial al organizatiei Microchip. Acesta este descris in detaliu in subcapitolul
+\ref{subsec:atwinc1500}.
+
+Directorul "http" contine rutinele necesare crearii si mentinerii unei conexiuni HTTP. Aceste rutine sunt utilizate la transmiterea informatiilor intre aplicatia 
+Android si senzor printr-o conexiune directa in procesul de instalare al senzorului.
 
 Directorul "MQTT" contine rutinele necesare crearii si mentinerii unei conexiuni cu un Broker MQTT si formatarea pachetelor conform acestui protocol. Implementarea 
 driverului este oferita de organizatia Eclipse cu liceta deschisa si poate fi descarcat sub forma de arhiva de pe github. Acest driver este impartit in doua directoare, 
@@ -373,31 +396,34 @@ verifica din nou daca este posibila initierea noii operatii. Timerul global se a
 predefinita, acesta va executa rutinele necesare rezolvarii erorii care a dus la pierderea operatiei. La rutinele din directorul "MQTTPacket" nu au fost ecesare 
 modificari, fiind complet decuplate de platforma de executie. 
 
-Directorul "ATWINC15x0" reprezinta driverul pentru controlerul ATWINC1500 oferit de organizatia Microchip sub licenta libera. Driverul este inclus in libraria 
-"mla", Microchip Libraries for Applications, si poate fi descarcat de pe site-ul oficial al organizatiei Microchip. Acesta este descris in detaliu in subcapitolul
-\ref{subsec:atwinc1500}.
-
 Directorul "Interfaces" reprezinta o abstractizare a driverelor utilizate in proiect, Zynq driver, ATWINC1500 driver si MQTT driver. Fiecare fisier sursa din acest director 
 contine rutine pentru initializarea perifericului specific denumirii fisierului si rutine pentru controlul acestuia. De asemenea, in cazul perifericelor care functioneaza 
 bazat pe intreruperi fisierul contine si rutinele de tip Handler care se executa la aparitia unui eveniment. Fisierele antet contin macrouri pentru caracteristicile 
-fiecarui periferic, macrouri pentru identificarea pinilor sau pentru functii care pot fi sicrise intr-o singura linie de cod, si declaratii ale rutinelor care sunt 
+fiecarui periferic, macrouri pentru identificarea pinilor sau pentru functii care pot fi scrise intr-o singura linie de cod, si declaratii ale rutinelor care sunt 
 utilizate de fisiere externe. Fisierele utils.c si utils.h contin rutine generale utile intr-un proiect, cum ar fi o rutina pentru blocarea executiei pentru o anumita 
 perioada de timp (BusyDelay) si rutine pentru conversii intre tipuri de veriabile, de exemplu conversia din float in string sau inversarea ordinii caracterelor intr-un 
 string. Fisierele "netwrok\_protocol.c" si "network\_protocol.h" abstractizeaza operatiile necesare pentru initializarea si crearea unui Socket si pentru conectarea 
 la server.
 
-Directorul "Application" contine fisiere sursa si antet specifice aplicatiei. Fisierul "acquisition.c" contine rutine pentru initializarea si gestionarea achizitiei 
-de date de la senzorul de temperatura si umiditate HDC1080. Acesta contine o masina de stari care initiaza o noua achizitie de date, asteapta finalizarea acesteia, 
-converteste valorile obtinute in sir de caractere si gestioneaza posibilele erori. Fisierul "acquisition.h" contine declaratia starilor masinii de stari si a 
-variabilelor si functiilor utilizate de fisiere externe. Fisierul "publish.c" este responsabil cu calcularea urmatorului moment in care se va transmite un pachet,
-de creearea pachetului si adaugarea acestuia in coada. Fisierul "app.c" contine masina de stare generala a aplicatiei, functii de tip handler care gestioneaza 
-evenimentele care au loc in retea, masina de stare pentru resetarea dispozitivului la setarile din fabrica si defineste o coada de mesaje si rutinele necesare 
-pentru gestiunea acesteia, adaugare pachet, extragere pachet, stergere pachet. 
+Directorul "Peripherals" contine fisierele specifice fiecarui periferic al platformei Zynq Z7. Fisierele "hdc1080.c" si "hdc1080.h" definesc rutinele pentru initializarea 
+si configurarea modulului HDC1080 si o masina de stare pentru inceperea unei esantionari de date si citirea acestora. Fisierele "sgp40\_i2c.c" si "sgp40\_i2c.h" specifice 
+senzorului SGP40 si fisierele "sps30.c" si "sps30.h" specifice senzorului SPS30 reprezinta un nivel de abstractizare al driver-ului oferot de Sensirion pentru acestia. 
+Rutinele continute in aceste fisiere corespund cu comenzile care pot fi trimise catre senzori, cum ar fi obtinerea numarului serial de indentificare, pornirea unei achizitii, 
+pornirea procesului de calibrare automata etc, iar structurarea datelor conform cu structura registriilor senzorilor si comunicatia peste protocolul I2C este realizata de 
+catre fisierele din directorul "sensirion\_driver".  
 
-Directorul "Peripherals" contine fisierele specifice fiecarui periferic al platformei Zynq Z7, controlerul de retea ATWINC1500 si senzorul de temperatura si 
-umiditate HDC1080. Fisierele "hdc1080.c" si "hdc1080.h" definesc rutinele pentru initializarea si configurarea modulului HDC1080. De asemenea, contine si o masina 
-de stare pentru inceperea unei esantionari de date si citirea acestora. Fisierul "winc1500\_api.c" reprezinta fisierul in care sunt implementate functiile de tip 
-stub specifice modulului ATWINC1500.
+Directorul "sensirion\_driver" reprezinta driver-ul pentru senzorii SGP40 si SPS30 oferit de compania Sensirion sub licenta libera. Acesta poate fi descarcat de pe site-ul 
+oficial al companiei Sensirion. Fisierele "sensirion\_i2c.c" si "sensirion\_i2c.h" contin functii de tip stub pentru initializarea, scrierea si citirea peste interfata de 
+comunicatie I2C. Aceste functii sunt de tipul stub, sunt specifice platformei in care este utilizat driver-ul si trebuie implementate de catre integrator. Fisierele 
+"sensirion\_common.c" si "sensirion\_common.h" contin functii pentru diferite conversii intre tipuri de date, cum ar fi conversia din float in sir de octeti, functii pentru 
+calcularea si verificarea octetului de verificare a integritatii pachetului (CRC) si functii pentru formatarea datelor care sunt scrise in sau citite din registrii celor 2 
+senzori SGP40 si SPS30 conform cu structura acestora.
+
+Directorul "sensirion\_gas\_index\_algorithm" contine algoritmul pentru interpretarea datelor citite de la senzorul SGP40 si este oferit de compania Sensirion sub licenta 
+libera. Acest algoritm primeste ca intrare valorile brute citite de senzor in unitatea de masura micrometru sau parti pe milion si returneaza un indince al compusilor 
+organici volatili. Sensirion ofera un cod de culori care corespunde cu valorile indicelui returnat de algoritm pentru interpretarea acestuia din punct de vedere al 
+calitatii aerului. Algoritmul compenseaza variatia valorilor care exista intre senzorii SGP40, iar semnalul brut de intrare trebuie oferit la un interval constant de o 
+secunda.
 
 Fisierul lscript.ld reprezinta fisierul care defineste adresa de baza a memoriei unde este scris codul sursa, dimensiunea memoriilor RAM si dimensiunea stivei.
 
@@ -413,7 +439,7 @@ Urmatoarele paragrafe contin o descriere a fluxului de executie prezentat in fig
 fi cuprinse in figura din cauza complexitatii si a dimensiunii. 
 
 La pornirea sistemului este executata starea "Initialize all peripherals" unde sunt initializate toate perifericele utilizate de catre aplicatie, atat cele externe 
-platformei Arty Z7, modulul HDC1080 si modulul ATWINC1500, cat si cele integrate, modulele Clock, Timer, Interrupts etc.
+platformei Arty Z7, modulele HDC1080, SGP40, SPS30 si ATWINC1500, cat si cele integrate, modulele Clock, Timer, Interrupts etc.
 
 La pornirea buclei infinite este executata starea "Search for AP information in memory" in care se verifica daca modulul ATWINC1500 contine in memorie informatiile 
 necesare pentru conectarea la un router. Aceste informatii sunt numele retelei (SSID), tipul de autentificare si parola, fiind memorate la finalul procesului de instalare. 
@@ -440,17 +466,17 @@ pachetului MQTT CONNECT.
 In starea "Subscribe for alarms" senzorul transmite un mesaj Brokerului MQTT prin care cere subscriptia la topicul pentru configurari. Acest topic este utilizat pentru 
 receptia de mesaje de configurare de la aplicatia Android.
 
-Daca in oricare din starile care presupun o conexiune cu un modul extern are loc o eroare se va aplica un algoritm de crestere a timpului intre reincercari 
-exponential. Acest algoritm incepe cu o reincercare imediata, apoi va reincerca conexiunea dupa 10 secunde, dupa 30 de secunde, dupa un minut si in final la fiecare 
+Daca in oricare din starile care presupun o conexiune cu un modul extern are loc o eroare se va aplica un algoritm de crestere exponentiala a timpului dintre 
+reincercari. Acest algoritm incepe cu o reincercare imediata, apoi va reincerca conexiunea dupa 10 secunde, dupa 30 de secunde, dupa un minut si in final la fiecare 
 5 minute. Acest algoritm previne reincercarea conexiunii prea frecvente care poate duce la supraincarcarea modulului extern.
 
-Urmatoarea stare este ilustrata prinytr-un romb gol care semnifica inceperea buclei de functionare a aplicatiei. Cat timp senzorul functioneaza normal, nu se pierde 
+Urmatoarea stare este ilustrata printr-un romb gol care semnifica inceperea buclei de functionare a aplicatiei. Cat timp senzorul functioneaza normal, nu se pierde 
 conexiunea cu oricare din modulele externe sau nu este actionat fizic de catre utilizator, aceasta va executa aceasta bucla la infinit. In aceasta bucla, in starea 
 "Queue Empty?" se verifica daca exista un mesaj in coada de aplicatie. Daca exista un mesaj acesta este transmis, iar daca nu exista se trece mai departe si se verifica, 
 in starea "Publish time" daca a venit momentul pregatirii unui nou pachet. Acest moment este calculat in secunde si este mentinut intr-o variabila globala. Daca 
 secunda curenta este mai mica decat secunda la care trebuie pregatit urmatorul pachet se reia bucla, altfel se executa conditia "Data Ready?". Aceasta conditie 
-informeaza modulul de achizitie ca este necesar un nou set de date de temperatura si umiditate. Daca aceste date nu sunt pregatite, se va executa starea "Start Acquisition" 
-care porneste o noua achizitie, apoi la fiecare executie a buclei se verifica daca achizitia s-a finalizat. La finalul achizitiei, sunt pregatite doua pachete de tip 
+informeaza modulul de achizitie ca este necesar un nou set de date de calitate a aerului. Daca aceste date nu sunt pregatite, se va executa starea "Start Acquisition" 
+care porneste o noua achizitie, apoi la fiecare executie a buclei se verifica daca achizitia s-a finalizat. La finalul achizitiei, este pregatit un pachet de tip 
 PUBLISH in care sunt adaugate datele achizitionate, iar apoi sunt urcate in coada de aplicatie in starea "Enqueue MQTT Publish". Urmeaza starea "Compute Next publish" 
 in care variabila care mentine secunda la care urmatorul pachet trebuie pregatit este calculata bazat pe secunda curenta a sistemului si pe perioada de publicare. La 
 urmatoarea rulare a buclei vor fi gasite doua mesaje in coada de aplicatie si vor fi transmise catre Brokerul MQTT.
