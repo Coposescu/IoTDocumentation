@@ -283,28 +283,28 @@ Acest modul este compus din doua componente principale, un dispozitiv care are c
 printr-un mediu fara fir si un router care realizeaza legatura dintre reteaua locala si internet. Rolul acestui modul este de a realiza o conexiune cu un router,
 de a achizitiona date de calitate a aerului si de a le transmite catre aplicatia Android. 
 
-Pentru realizarea senzorului s-a utilizat platforma de dezvoltare Arty Z7 la care este conectat un controller de retea ATWINC1500, senzorul de temperatura 
-si umiditate HDC1080, senzorul pentru compusii organici volatili SGP40 si senzorul pentru particulele in suspensie SPS30. Pentru realizarea schemei arhitecturale a fost 
-utilizat mediul de dezvoltare Xilinx Vivado 2018.3, iar pentru dezvoltarea codului sursa in limbajul de programare C a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3.
-
-Figura \ref{fig:PI_SensorUnitDiagram} prezinta arhitectura modulului de achizitionare a indicilor de calitate a aerului.
+Figura \ref{fig:PI_SensorUnitDiagram} prezinta arhitectura detaliata a modulului de achizitionare a indicilor de calitate a aerului.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{figs/PI_SensorUnitDiagram.png}
     \caption{Arhitectura modulului Senzor}
     \label{fig:PI_SensorUnitDiagram}
-\end{figure}
+\end{figure} 
 
-\subsection{Platforma de dezvoltare Arty Z7}\label{subsec:artyz7_platform}
-Nucleul platformei de dezvoltare Arty Z7 este sistemul integrat Zynq7000 \cite{zynq7000ug585}, avand o multitudine de porturi si componente periferice pentru adaptarea la diferite 
-proiecte. De pe aceasta platforma sunt utilizate cele doua porturi pmod si 5 pini de pe conectorii J2 si J7. Senzorii HDC1080 si SGP40 sunt conectati la portul pmodB, controllerul 
-de retea ATWINC1500 este conectat la portul pmodA, iar senzorul SPS30 este conectat la conectorii J2 si J4. Sistemul integrat Zynq7000 reprezinta unitatea de control al tututor 
-perifericelor de pe platforma si a portului MicroUSB utilizat pentru alimentarea cu 5 volti si pentru comunicatia cu un calculator personal prin interfata de comunicare UART.
+De pe platforma Arty Z7 sunt utilizate cele doua porturi Pmod si 5 pini de pe conectorii J2 si J7. Senzorul HDC1080 este conectat la conectorul PmodB, iar senzorul 
+SGP40 la placa de circuite integrate PmodHYGRO in conectorul pus la dispozitie pentru legarea mai multor senzori in serie. Acesti 2 senzori sunt conectati la aceeasi 
+magistrala I2C si sunt diferentiati prin adresare. Controlerul de retea ATWINC1500 este conectat la portul PmodA al placii Arty Z7, iar senzorul SPS30 la conectorii J2 
+si J4. Sistemul integrat Zynq-7000 reprezinta unitatea de control a tututor perifericelor de pe platforma si a portului MicroUSB utilizat pentru alimentarea cu 5 volti 
+si pentru comunicatia cu un calculator personal prin interfata de comunicare UART. 
 
-Arhitectura interna a sistemului integrat Zynq7000 este formata dintr-un procesor de tip ARM Cortex-A9 cu doua nuclee si partea logica FPGA 7-series. Proiectul 
-de fata utilizeaza procesorul ARM Cortex-A9 pentru crearea unui microcontroller si partea logica pentru conectarea porturilor necesare la microcontroller. 
+Conectorii Pmod de pe placa de dezvoltare Arty Z7 ofera pini pentru alimentarea cu 3.3V. Senzorul SPS30 trebuie alimentat la tensiunea de 5V care este disponibila pe 
+conectorul J7. 
 
-Schema de design a platformei Arty Z7 contine un set de periferice si porturi care sunt conectate la procesorul ARM Cortez-A9 si un set de periferice si porturi 
+Pentru realizarea schemei arhitecturale a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3, iar pentru dezvoltarea codului sursa in limbajul de programare C 
+a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3. Procesorul ARM Cortex-A9 \cite{zynq7000ug585} este utilizat pentru executarea instructiunilor microcontroller-ului,
+iar partea logica pentru conectarea porturilor necesare la microcontroller.
+
+Schema de design a platformei Arty Z7 contine un set de periferice si porturi care sunt conectate la procesorul ARM Cortex-A9 si un set de periferice si porturi 
 conectate la partea logica FPGA. De exemplu, porturile pmod sunt conectate la partea logica, iar portul MicroUSB este conectat la procesor. Pentru utilizarea 
 componentelor sau porturilor periferice conectate la partea logica FPGA in procesorul ARM Cortex-A9 este utilizata interfata EMIO care este o extensie a 
 multiplexorului de intrari si iesiri al procesorului.
@@ -348,10 +348,8 @@ Pentru creearea diagramei de proiectare in mediul de lucru Vivado 2018.3 sunt ne
     fisier contine informatiile necesare generarii driverului doar pentru perifericele activate si configurate la pasul 4.
 \end{enumerate}
 
-Platforma de dezvoltare Arty Z7 ofera ca sursa de ceas un crystal cu frecventa de 50 MHz care este conectat ca intrare in procesorul ARM Cortex-A9. Procesorul multiplica 
-semnalul de ceas printr-un circuit PLL, iar apoi il distribuie componentelor periferice. Alegerea frecventei sursei de ceas este in stransa legatura cu modulele timer 
-necesare functionarii aplicatiei, si anume, doua module timer care numara la milisecunda. Pentru a obtine o acuratete cat mai buna a milisecundei, sursa de ceas este 
-multiplicata cu un factor de 16, obtinand astfel o frecventa a sursei de ceas de 400Mhz.
+Alegerea frecventei sursei de ceas este in stransa legatura cu modulele timer necesare functionarii aplicatiei, si anume, doua module timer care numara la milisecunda. 
+Pentru a obtine o acuratete cat mai buna a milisecundei, sursa de ceas este multiplicata cu un factor de 16, obtinand astfel o frecventa a sursei de ceas de 400Mhz.
 
 Figura \ref{fig:PI_SDKFileStructure} prezinta structura fisierelor proiectului in mediul de programare Xilinx SDK. Fiecare director reprezinta un modul al proiectului 
 si contine fisere asociate cu denumirea acestuia. Structura fisierelor a fost impartita in doua imagini asezate in paralel pentru a reduce inaltimea acesteia. Fisierele 
@@ -376,7 +374,7 @@ pentru gestiunea acesteia, adaugare pachet, extragere pachet, stergere pachet.
 
 Directorul "atwinc15x0" reprezinta driverul pentru controlerul ATWINC1500 oferit de organizatia Microchip sub licenta libera. Driverul este inclus in libraria 
 "mla", Microchip Libraries for Applications, si poate fi descarcat de pe site-ul oficial al organizatiei Microchip. Acesta este descris in detaliu in subcapitolul
-\ref{subsec:atwinc1500}.
+\ref{subsec:af_atwinc}.
 
 Directorul "http" contine rutinele necesare crearii si mentinerii unei conexiuni HTTP. Aceste rutine sunt utilizate la transmiterea informatiilor intre aplicatia 
 Android si senzor printr-o conexiune directa in procesul de instalare al senzorului.
@@ -407,23 +405,18 @@ la server.
 
 Directorul "Peripherals" contine fisierele specifice fiecarui periferic al platformei Zynq Z7. Fisierele "hdc1080.c" si "hdc1080.h" definesc rutinele pentru initializarea 
 si configurarea modulului HDC1080 si o masina de stare pentru inceperea unei esantionari de date si citirea acestora. Fisierele "sgp40\_i2c.c" si "sgp40\_i2c.h" specifice 
-senzorului SGP40 si fisierele "sps30.c" si "sps30.h" specifice senzorului SPS30 reprezinta un nivel de abstractizare al driver-ului oferot de Sensirion pentru acestia. 
+senzorului SGP40 si fisierele "sps30.c" si "sps30.h" specifice senzorului SPS30 reprezinta un nivel de abstractizare al driver-ului oferit de Sensirion pentru acestia. 
 Rutinele continute in aceste fisiere corespund cu comenzile care pot fi trimise catre senzori, cum ar fi obtinerea numarului serial de indentificare, pornirea unei achizitii, 
 pornirea procesului de calibrare automata etc, iar structurarea datelor conform cu structura registriilor senzorilor si comunicatia peste protocolul I2C este realizata de 
 catre fisierele din directorul "sensirion\_driver".  
 
-Directorul "sensirion\_driver" reprezinta driver-ul pentru senzorii SGP40 si SPS30 oferit de compania Sensirion sub licenta libera. Acesta poate fi descarcat de pe site-ul 
-oficial al companiei Sensirion. Fisierele "sensirion\_i2c.c" si "sensirion\_i2c.h" contin functii de tip stub pentru initializarea, scrierea si citirea peste interfata de 
-comunicatie I2C. Aceste functii sunt de tipul stub, sunt specifice platformei in care este utilizat driver-ul si trebuie implementate de catre integrator. Fisierele 
-"sensirion\_common.c" si "sensirion\_common.h" contin functii pentru diferite conversii intre tipuri de date, cum ar fi conversia din float in sir de octeti, functii pentru 
-calcularea si verificarea octetului de verificare a integritatii pachetului (CRC) si functii pentru formatarea datelor care sunt scrise in sau citite din registrii celor 2 
-senzori SGP40 si SPS30 conform cu structura acestora.
+Directorul "sensirion\_driver" reprezinta driver-ul pentru senzorii SGP40 si SPS30. Fisierele "sensirion\_i2c.c" si "sensirion\_i2c.h" contin functii de tip stub pentru 
+initializarea, scrierea si citirea peste interfata de comunicatie I2C. Aceste functii sunt de tipul stub, sunt specifice platformei in care este utilizat driver-ul si 
+trebuie implementate de catre integrator. Fisierele "sensirion\_common.c" si "sensirion\_common.h" contin functii pentru diferite conversii intre tipuri de date, cum 
+ar fi conversia din float in sir de octeti, functii pentru calcularea si verificarea octetului de verificare a integritatii pachetului (CRC) si functii pentru formatarea 
+datelor care sunt scrise in sau citite din registrii celor 2 senzori SGP40 si SPS30 conform cu structura acestora.
 
-Directorul "sensirion\_gas\_index\_algorithm" contine algoritmul pentru interpretarea datelor citite de la senzorul SGP40 si este oferit de compania Sensirion sub licenta 
-libera. Acest algoritm primeste ca intrare valorile brute citite de senzor in unitatea de masura micrometru sau parti pe milion si returneaza un indince al compusilor 
-organici volatili. Sensirion ofera un cod de culori care corespunde cu valorile indicelui returnat de algoritm pentru interpretarea acestuia din punct de vedere al 
-calitatii aerului. Algoritmul compenseaza variatia valorilor care exista intre senzorii SGP40, iar semnalul brut de intrare trebuie oferit la un interval constant de o 
-secunda.
+Directorul "sensirion\_gas\_index\_algorithm" contine algoritmul pentru interpretarea datelor citite de la senzorul SGP40.
 
 Fisierul lscript.ld reprezinta fisierul care defineste adresa de baza a memoriei unde este scris codul sursa, dimensiunea memoriilor RAM si dimensiunea stivei.
 
@@ -480,62 +473,3 @@ care porneste o noua achizitie, apoi la fiecare executie a buclei se verifica da
 PUBLISH in care sunt adaugate datele achizitionate, iar apoi sunt urcate in coada de aplicatie in starea "Enqueue MQTT Publish". Urmeaza starea "Compute Next publish" 
 in care variabila care mentine secunda la care urmatorul pachet trebuie pregatit este calculata bazat pe secunda curenta a sistemului si pe perioada de publicare. La 
 urmatoarea rulare a buclei vor fi gasite doua mesaje in coada de aplicatie si vor fi transmise catre Brokerul MQTT.
-
-\subsection{Controllerul de retea ATWINC1500}\label{subsec:atwinc1500}
-Aesta este un sistem integrat intr-un singur cip care ofera o interfata accesibila si eficienta pentru conectarea la o retea Wi-Fi. Contine stiva de comunicare TCP/IP 
-integrata in cip, suporta standardele de comunicatie IEEE 802.11 b/g/n si opereaza in banda de frecventa 2.4 GHz.
-
-WINC1500-XPRO reprezinta o placa de extensie pentru modulul ATWINC1500 care ofera un conector de 20 de pini pentru a facilita integrarea acestuia cu un microcontroler 
-gazda. Interfata de comunicare dintre acesta si platforma Arty Z7 este SPI, iar interfata API care defineste setul de reguli si tipul de mesaje acceptate de modulul 
-ATWINC1500 este implementata in driverul oferit de microchip. Aceasta implementare trebuie adaptata la platforma utilizata, iar pentru acest lucru in fisierul antet 
-"winc1500\_api.h" exista declaratii ale rutinelor care sunt specifice fiecarei platforme si care trebuie implementate de catre 
-integratorul driverului. Acestea sunt numite functii stub si implementarea corecta a acestora este necesara pentru functionarea rutinelor driverului. Acestea sunt 
-descrise in urmatoarele puncte:
-\begin{enumerate}
-	\item m2mStub\_PinSet\_CE - implementeaza managementul pinului CHIP\_EN. Valoarea 1 logic activeaza modulul ATWINC1500, iar valoarea 0 logic il dezactiveaza.
-	\item m2mStub\_PinSet\_RESET - implementeaza managementul pinului RESET. Acesta este utilizat pentru resetarea modulului si este activ in 0 logic.
-	\item m2mStub\_PinSet\_SPI\_SS - implementeaza managementul pinului SS al interfetei SPI. 
-	\item m2mStub\_EintEnable - activeaza intreruperile pe pinul IRQN al modulului.
-	\item m2mStub\_EintDisable - dezactiveaza intreruperile pe pinul IRQN al modulului.
-	\item m2mStub\_SpiTxRx - implementeaza functionalitatea de transfer de date prin interfata SPI.
-	\item m2mStub\_GetOneMsTimer - accesseaza registrul Counter al timerului dedicat pentru modulul ATWINC1500 si returneaza valoarea acestuia.
-\end{enumerate}
-
-In fisa de date a modulului ATWINC1500 \cite{atwinc1500} este precizat ca ofera suport pentru protocolul Wi-Fi Direct care ar fi fost util in procesul de instalare al senzorului,
-dar versiunile de microprogram de pe modulul ATWINC1500 mai noi de versiunea din data de 10/2018 nu mai suporta acest protocol. Astfel, pentru procesul de instalare al 
-device-ului este utilizat AP in care modulul ATWINC1500 se comporta ca un router care suporta conectarea unui singur dispozitiv.
-
-\subsection{Senzorul de temperatura si umiditate HDC1080}\label{subsec:hdc1080}
-Acesta este un senzor digital care masoara temperatura si umiditatea mediului in care se afla cu un consum de energie foarte mic. 
-
-PmodHYGRO reprezinta platforma, placa de circuite integrate, pe care se afla senzorul HDC1080. Aceasta ofera circuitele pasive necesare functionarii senzorului si 
-un conector pmod care face usoara conectarea acestuia la platforma Arty Z7.
-
-Protocolul de comunicare cu senzorul este I2C. Acesta are rolul de slave, iar procesorul Zynq 7000 are rolul de master pe magistrala I2C. Modulul HDC1080 are un 
-registru indicator care mentine ultima adresa de la care s-a efectuat o citire sau o scriere. Pentru realizarea unei scrieri sau citiri a unui registru, mai intai 
-trebuie scris registrul indicator, iar apoi efectuata scrierea sau citirea efectiva a registrului dorit. Primul octet transmis contine adresa I2C pe 7 biti a 
-modulului HDC1080 si bitul care indica o scriere sau o citire. Al doilea octet contine adresa registrului cu care se efectueaza operatia de citire sau scriere. 
-In cazul unei scrieri, dispozitivul master transmite al doile si al treilea octet care contin date fara a intrerupe comunicatia. In cazul unei citiri, dupa scrierea 
-registrului indicator se initiaza tranzactia I2C de citire in care se transmite din nou adresa I2C si bitul de citire, iar apoi se receptioneaza un numar de octeti. 
-Registrul indicator al senzorului se incrementeaza automat dupa citirea unei adrese, ceea ce face posibila citirea temperaturii si umiditatii, care sunt doi registri 
-diferiti, intr-o singura tranzactie I2C de citire.
-
-Figura \ref{fig:PI_HDC1080ReadOperation} prezinta o captura a unei tranzactii I2C pentru citirea metricilor senzorului efectuata cu un analizor logic. Figura contine 
-inceputul tranzactiei in partea de sus si finalul tranzactiei in partea de jos, mijlocul tranzactiei fiind omis deoarece este format din incercari de initiere a unei 
-tranzactii la care senzorul raspunde cu NACK. In paragraful urmator figurii este descrisa in detaliu tranzactia.
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.55]{figs/PI_HDC1080ReadOperation.png}
-    \caption{Operatia de citire a temperaturii si a umiditatii}
-    \label{fig:PI_HDC1080ReadOperation}
-\end{figure}
-
-Pentru a incepe o achizitie de temperatura si umiditate trebuie executata o operatie de scriere a registrului pointer in care adresa scrisa in registrul pointer este 
-0x00, adica adresa registrului de temperatura. Acest lucru este reprezentat de primii 2 octeti din partea de sus a figurii la care senzorul raspunde cu ACK. Al treilea 
-si al patrulea octet din partea de sus a figurii reprezinta initieri a unei tranzactii de citire la care senzorul raspunde cu NACK, deoarece continutul acestuia nu a 
-fost actualizat. Primul octet din partea de jos a figurii reprezinta tot o initiere a operatiei de citire la care senzorul raspunde cu NACK. La al doilea octet, in schimb, 
-senzorul raspunde cu ACK, ceea ce inseamna ca achizitia s-a incheiat si valorile temperaturii si a umiditatii pot fi citite. Octetii 3 si 4 reprezinta valoarea 
-temperaturii, iar octetii 5 si 6 reprezinta valoarea umiditatii. Ambele valori sunt reprezentate pe 16 biti avand cel mai putin semnificativi 2 biti mereu 0x00, 
-deoarece rezolutia convertorului din analog in digital este de maximum 14 biti. Pentru a obtine temperatura in grade celsius si umiditatea in procent, valorile 
-obtinute la finalul achizitiei trebuie trecute prin doua formule, una specifica temperaturii si una specifica umiditatii. Aceste formule sunt oferite de catre 
-fisa de date a senzorului.
