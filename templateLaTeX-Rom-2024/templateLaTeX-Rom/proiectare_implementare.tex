@@ -300,9 +300,11 @@ si pentru comunicatia cu un calculator personal prin interfata de comunicare UAR
 Conectorii Pmod de pe placa de dezvoltare Arty Z7 ofera pini pentru alimentarea cu 3.3V. Senzorul SPS30 trebuie alimentat la tensiunea de 5V care este disponibila pe 
 conectorul J7. 
 
-Pentru realizarea schemei arhitecturale a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3 \cite{zynq7000ug892}, iar pentru dezvoltarea codului sursa in limbajul de programare C 
-a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3 \cite{zynq7000ug1145}. Procesorul ARM Cortex-A9 \cite{zynq7000ug585} este utilizat pentru executarea instructiunilor microcontroller-ului,
-iar partea logica pentru conectarea porturilor necesare la microcontroller.
+Pentru realizarea schemei arhitecturale a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3 \cite{zynq7000ug892}, iar pentru dezvoltarea codului sursa in limbajul 
+de programare C a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3 \cite{zynq7000ug1145}. Procesorul ARM Cortex-A9 \cite{zynq7000ug585} este utilizat pentru 
+executarea instructiunilor microcontroller-ului, iar partea logica pentru conectarea porturilor necesare la microcontroller. Au fost alese mediile de dezvoltare cu 
+versiunea 2018.3 din cauza unor probleme de integrare intampinate utilizand mediul de dezvoltare Vitis. Mai exact, generarea automata a librariei pe baza fisierului 
+".xsa" genera multiple erori. Versiunea 2018.3 a fost aleasa pe baza experientei din trecut.
 
 Schema de design a platformei Arty Z7 contine un set de periferice si porturi care sunt conectate la procesorul ARM Cortex-A9 si un set de periferice si porturi 
 conectate la partea logica FPGA. De exemplu, porturile pmod sunt conectate la partea logica, iar portul MicroUSB este conectat la procesor. Pentru utilizarea 
