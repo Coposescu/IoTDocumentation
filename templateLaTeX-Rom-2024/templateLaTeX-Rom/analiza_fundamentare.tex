@@ -641,7 +641,7 @@ rutine intensive, cum ar fi procesarea de semnale, din acesta in partea logica a
 Platforma de dezvoltare Arty Z7 ofera ca sursa de ceas un crystal cu frecventa de 50 MHz care este conectat ca intrare in procesorul ARM Cortex-A9. Procesorul 
 multiplica semnalul de ceas printr-un circuit PLL, iar apoi il distribuie componentelor periferice.
 
-Pentru crearea unui design hardware, compania Xilinx pune la dispozitie mediul de dezvoltare Vivado Design Suite. Acesta contine toate uneltele necesare pentru 
+Pentru crearea unui design hardware, compania AMD Xilinx pune la dispozitie mediul de dezvoltare Vivado Design Suite. Acesta contine toate uneltele necesare pentru 
 crearea unui design hardware de la zero, unelte precum blocuri IP uzuale care pot fi adaugate direct intr-o schema de desing, sintetizarea si analiza schemei de 
 design si depanarea problemelor. De asemenea, acest mediu de programare ofera posibilitatea de utilizare a sistemului integrat Zynq-7000 ca pe un microcontroller. 
 Acest lucru este realizat automat de catre mediul de dezvoltare Vivado prin adaugarea in design a blocului IP "Zynq7 Processing System". Prin accesarea acestui block 
@@ -655,7 +655,7 @@ Pentru dezvoltarea codului sursa al unei aplicatii, compania Xilinx pune la disp
 integrarea codului sursa cu design-ul hardware acesta pune la dispozitie un mecanism automat care pe baza unui fisier ".hdf" generat de Vivado creeaza o biblioteca sub 
 forma unui proiect nou.
 
-Mediul de dezvoltare Vitis oferit de compania Xilinx este mai nou si a fost creeat special pentru sistemele integrate care includ FPGA si procesor ARM. Acesta combina 
+Mediul de dezvoltare Vitis oferit de compania AMD Xilinx este mai nou si a fost creeat special pentru sistemele integrate care includ FPGA si procesor ARM. Acesta combina 
 mediul de dezvoltare Vivado Design Suite cu mediul de dezvoltare Xilinx SDK intr-un singur mediu de dezvoltare care ofera un nivel mai inalt de abstractizare.
 
 \subsection{Controlerul de retea ATWINC1500}\label{subsec:af_atwinc}
@@ -731,7 +731,7 @@ obtinute la finalul achizitiei trebuie trecute prin doua formule, una specifica 
 fisa de date a senzorului \cite{hdc1080}.
 
 \subsection{Senzorul SGP40}\label{subsec:af_sgp40}
-SGP40 este un senzor digital creat de compania Sensirion care masoara concentratia compusilor organici volatili (VOC) din aer. Tehnologia de masurare este compusa 
+SGP40 \cite{sgp40} este un senzor digital creat de compania Sensirion care masoara concentratia compusilor organici volatili (VOC) din aer. Tehnologia de masurare este compusa 
 dintr-un element care incalzeste un strat semiconductor cu oxid metalic care cauzeaza o reactie chimica atunci cand compusii organici volatili sunt prezenti in aer. 
 Aceasta reactie produce schimbari in rezistivitatea semiconductorului care este transformata in semnal digital.
 
@@ -750,7 +750,7 @@ cu valorile indicelui returnat de algoritm pentru interpretarea acestuia din pun
 intre senzorii SGP40, iar semnalul brut de intrare trebuie oferit la un interval constant de o secunda.
 
 \subsection{Senzorul SPS30}\label{subsec:af_sps30}
-SPS30 este un senzor digital creat de compania Sensirion care masoara concentratia particulelor in suspensie (PM) din aer. Tehnologia de masurare este numita 
+SPS30 \cite{sps30} este un senzor digital creat de compania Sensirion care masoara concentratia particulelor in suspensie (PM) din aer. Tehnologia de masurare este numita 
 "Laser Scattering" si presupune o sursa de lumina laser care lumineaza particulele care trec printr-o camera de detectie si un fotodetector care detecteaza 
 dispersia luminii cauzata de aceste particule. Intensitatea cu care este dispersata lumina ofera informatii legate de marimea si concentratia particulelor care 
 este transformata in semnal digital.
