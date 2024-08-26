@@ -1,14 +1,52 @@
 \chapter{Manual de instalare și utilizare}
 \pagestyle{fancy}
 
-În secțiunea de Instalare trebuie să detaliați resursele software și hardware necesare pentru instalarea și rularea aplicației, precum și o descriere pas cu pas a procesului de instalare.
+\section{Resurse necesare}\label{sec:iu_resurse_necesare}
+Pentru instalarea si utilizarea aplicatiei sunt necesare urmatoarele resurse hardware si software:
+\begin{itemize}
+    \item Client git pentru clonarea proiectului.
+	\item Senzorul fizic de monitorizare a calitatii aerului format din placa de dezvoltare ArtyZ7, controller-ul de retea ATWIC1500 si cei 3 senzori HD1080, 
+	SPS30 si SGP40.
+	\item O masina cu sistem de operare windows sau linux pe care sa ruleze baza de date MongoDB, broker-ul MQTT Mosquitto, server-ul RESTful pentru accesul 
+	la baza de date si server-ul de legatura dintre Mosquitto si baza de date.
+    \item Telefon mobil cu sistem de operare Android.
+\end{itemize}
 
-Instalarea aplicației trebuie să fie posibilă pe baza a ceea ce se scrie aici.
+\section{Instalarea senzorului}\label{sec:iu_instalare_senzor}
+Da la urmatorul link https://github.com/Coposescu/zynq7000\_atwinc.git poate fi descarcat codul sursa pentru senzor. In urmatoarele puncte sunt descrisi pasii 
+pentru generarea microprogramului, incarcarea acestuia pe placa si resursele necesare pentru aceste actiuni:
+\begin{enumerate}
+    \item Instalarea mediului de programare Vivado HLx 2018.3 si a mediului de programare Xilinx SDK 2018.3 de pe pagina oficiala AMD -> Products -> 
+    Software, Tools, \&Apps.
+    \item Din mediul Vivado -> File -> Open se deschide proiectul zynq7000\_atwinc.
+    \item Dupa deschiderea proiectului, in navigatorul din stanga se selecteaza "Generate Bitstream" pentru a genera microprogramul pentru partea logica FPGA.
+    \item Din meniul File -> Export -> Export Hardware.. se bifeaza casuta "Include bitstream" si se selecteaza "OK" pentru crearea fisierului ".hdf".
+    \item Se deschide mediul Xilinx SDK si de la meniul File -> Open Projects from File System se va deschide o fereastra in care trebuie introdusa calea catre 
+    proiect. Pentru acest lucru se selecteaza "Directory" si se cauta in sistemul de fisiere folder-ul cu numele "zynq7000\_atwinc\_sdk". Acest folder se afla in 
+    proiectul descarcat de pe git zynq7000\_atwinc/zynq7000\_atwinc.sdk.
+    \item Se repeta pasul anterior pentru proiectele: 
+    \begin{itemize}
+        \item "zynq7000\_atwinc\_FSBL".
+        \item "zynq7000\_atwinc\_FSBL\_bsp".
+        \item "design\_1\_wrapper\_hw\_platform\_0".
+        \item "zynq7000\_atwinc\_sdk\_bsp".
+    \end{itemize}
+    \item In meniul "Project Explorer" afisat in stanga ecranului ar trebui sa apara cele 5 proiecte. Prin click dreapta pe fiecare proiect se selecteaza din meniul aparut 
+    "build" pentru generarea microprogramului specific fiecarui proiect.
+    \item Dupa ce toate proiectele sunt construite cu success se acceseaza meniul Xilinx -> Create Boot Image pentru crearea microprogramului final care va fi incarcata pe 
+    placa Arty Z7.
+    \item In fereastra care sa deschis se bifeaza casuta "Import from existing BIF file", se introduce calea catre acest fisier 
+    "zynq7000\_atwinc\_FSBL\\bootimage\\zynq7000\_atwinc\_FSBL.bif" si se selecteaza "Create Image".
+    \item Pe placa de dezvoltare Arty Z7 jumper-ul JP4 trebuie sa fie pozitionat in modul JTAG. Dupa pozitionarea corecta a jumper-ului placa trebuie resetata prin deconectarea 
+    si reconectarea alimentarii.
+    \item Din meniul Xilinx -> Program Flash -> Program se incarca microprogramul final pe placa.
+    \item Jumper-ul JP4 trebuie mutat in pozititia QSPI si resetata placa din alimentare din nou.
+    \item Ledurile LD13 si DONE ar trebui sa fie aprinse daca toti pasii au fost respectati.
+\end{enumerate}
 
-În acest capitol trebuie să descrieți cum se utilizează aplicația din punct de vedere al utilizatorului, fără a menționa aspecte tehnice interne.
-
-Folosiți capturi ale ecranului și explicații pas cu pas ale interacțiunii.
-
-Folosind acest manual, o persoană ar trebui să poată utiliza produsul vostru.
-
-{\noindent\color{blue} Între 1 și 5 pagini.\\}
+\section{Instalare servere}\label{sec:iu_instalare_servere}
+\subsection{Instalare Mosquitto}\label{subsec:iu_instalare_mosquitto}
+\subsection{Instalare MongoDB}\label{subsec:iu_instalare_mongoDB}
+\subsection{Instalare programe Python}\label{subsec:iu_instalare_python}
+\section{Instalare aplicatie Android}\label{sec:iu_instalare_app_android}
+\section{Utilizarea intregului sistem}\label{sec:iu_utilizare_sistem}
