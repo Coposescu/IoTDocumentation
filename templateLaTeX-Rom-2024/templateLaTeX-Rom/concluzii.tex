@@ -1,13 +1,32 @@
 \chapter{Concluzii}
 \pagestyle{fancy}
 
-{\noindent\color{blue} Între 1 și 2 pagini.\\}
+Acest capitol va fi prezentat in 3 sectiuni, contributiile personale aduse domeniului monitorizarii calitatii aerului, analiza rezultatelor obtinute in urma 
+dezvoltarii lucrarii de fata si posibile dezvoltari ulterioare.
 
-Capitolul ar trebui sa conțină (nu se rezumă neapărat la):
-\begin{itemize}
-	\item un rezumat al contribuțiilor voastre
-	\item analiză critică a rezultatelor obținute
-	\item descriere a posibilelor dezvoltări și îmbunătățiri ulterioare
-\end{itemize}
+\section{Contributii personale}\label{c_contributii}
+Integrarea protocolului MQTT cu procesorul Zynq 7000 si imbunatatirea performantei driver-ului Paho MQTT oferit de Eclipse care este executat pe senzor prin 
+inlocuirea portiunilor de cod unde se utiliza blocarea buclei sistemului in asteptarea unui eveniment cu o semaforizare bazata pe module Timer.
 
+Integrarea controller-ului de retea ATWINC1500 cu procesorul Zynq 7000 ofera posibilitatea de a concentra puterea de procesare a cipului pe achizitia datelor de 
+la senzorii de calitate a aerului si, intr-o dezvoltare ulterioara, de a executa algoritmi constisitori pentru procesarea acestor date.
+
+\section{Analiza rezultatelor}\label{c_analiza_rezultate}
+In urma testelor efectuate pe sistem s-a constatat ca vizualizarea si interactiunea cu graficele pe un ecran atat de mic cum este cel al unui telefon este dificila. La 
+afisarea datelor istorice pe o perioada mai lunga, cum ar fi o saptamana sau mai mult, se pierd multe informatii din cauza afisarii acestora intr-un grafic restrans 
+ca dimensiune. 
+
+Utilizarea sistemului pe o perioada indelungata din punctul de vedere al unui utilizator care a achizitionat acest sistem a demonstrat utilitatea acestuia si necesitatea 
+de a fi integrat in spatiile inchise. Observarea in a aplicatie a unor valori care prezinta o calitate a aerului slaba a generat cautarea si inlaturarea sursei problemei. 
+De exemplu, necesitatea aerisirii incaperii dupa cateva ore de gatit, deoarece indexul compusilor oranici volatili a depasit pragul unei bune calitati a aerului.
+
+\section{Dezvoltari ulterioare}\label{c_dezvoltari_ulterioare}
+Imbunatatirea consumului de putere pentru adaptarea sistemului la functionarea pe baterii. In sectiunea \ref{sec:tv_pwrcons} a fost prezentat consumul senzorului de 
+calitate a aerului de 150 mA/h. Scaderea acestui consum implica limitarea utilizarii led-urilor strict la procesul de instalare, activarea perifericelor de comunicatie 
+I2C si SPI doar atunci cand sunt utilizate pentru o achizitie de date, implementarea modului de consum de putere redus (Low Power Mode) pe Zynq 7000, activarea modului 
+de consum redus pe senzori si pe controllerul de retea atunci cand nu sunt utilizati, etc. Consumul de putere ar trebui sa ajunga la o valoare care sa permita utilizarea 
+senzorului in mod continuu timp de minim un an.
+
+Integrarea senzorului intr-un sistem comun de monitorizare a calitatii aerului. Asa cum a fost prezentat in capitolul \ref{ch:studiubib} exista mai multe sisteme care pun 
+la dispozitia populatiei harta lumii impanzita de senzori de calitate a aerului a caror date pot fi vizualizate in timp real.
 
