@@ -8,27 +8,27 @@ actor Client2
 
 Cloud Broker [
 
-    MQTT    
+    Broker    
 
-    Broker  
+    MQTT  
 
 ]
 node Senzor1 [
-    Sensor1
+    Senzor1
 ]
 node Senzor2 [
-    Sensor2
+    Senzor2
 ]
 
-Client1 ---> Broker: Publish
-Client1 ---> Broker: Subscribe
-Client2 ---> Broker: Publish
-Client2 ---> Broker: Subscribe
+Client1 ---> Broker: Publica
+Client1 ---> Broker: Aboneaza
+Client2 ---> Broker: Publica
+Client2 ---> Broker: Aboneaza
 
-Broker <--- Senzor1: Publish
-Broker <--- Senzor1: Subscribe
-Broker <--- Senzor2: Publish
-Broker <--- Senzor2: Subscribe
+Broker <--- Senzor1: Publica
+Broker <--- Senzor1: Aboneaza
+Broker <--- Senzor2: Publica
+Broker <--- Senzor2: Aboneaza
 
 @enduml
 ```
@@ -41,37 +41,38 @@ skinparam linetype polyline
 skinparam shadowing true 
 left to right direction
 actor Client
-database "Database" as db
+database "Baza de date" as db
 package "RESTful API" as rest {
     rectangle View {
         rectangle Routes [
             
-            Routes
+            Rute
 
         ]   
     }
     rectangle Resources [
         
 
-            Resource
-            Manager     
+            Manager
+                de
+            Resurse     
 
 
     ]
-    rectangle "Resources" as res
+    rectangle "Resurse" as res
     rectangle Model [
         
         Model
 
     ]
 
-    Client --> Routes : "HTTP Request"
+    Client --> Routes : "Cerere HTTP"
     Routes --> Resources
     Resources --> Model
     Resources <-- Model
     Routes <-- Resources
     Model <--> db : "CRUD"
-    Client <-- View : "HTTP Response"
+    Client <-- View : "Raspuns HTTP"
     res <-- Resources
 }
 @enduml
