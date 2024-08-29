@@ -9,7 +9,15 @@ Integrarea protocolului MQTT cu procesorul Zynq 7000 si imbunatatirea performant
 inlocuirea portiunilor de cod unde se utiliza blocarea buclei sistemului in asteptarea unui eveniment cu o semaforizare bazata pe module Timer.
 
 Integrarea controller-ului de retea ATWINC1500 cu procesorul Zynq 7000 ofera posibilitatea de a concentra puterea de procesare a cipului pe achizitia datelor de 
-la senzorii de calitate a aerului si, intr-o dezvoltare ulterioara, de a executa algoritmi constisitori pentru procesarea acestor date.
+la senzorii de calitate a aerului si, intr-o dezvoltare ulterioara, de a executa algoritmi constisitori pentru procesarea acestor date, gestiunea 
+retelei fiind integrata in controlerul de retea.
+
+Structurarea datelor raportate de senzori conform cu cerintele bazei de date de tip serii in timp pentru a beneficia de toate avantajele acesteia, performante 
+foarte bune la scriere si interogare, capacitate de stocare mare si un grad inalt de scalabilitate.
+
+Raportarea parametrilor de calitate a aerului PM4.0 (particule in suspensie cu diametru mai mic de 4 micrometri) si TPS (media diametrului particulelor detectate) 
+care nu se regasesc in standardele existente de calitate a aerului sau in sistemele de calitate a aerului uzuale, dar care ofera informatii utile despre sursa si 
+tipul particulelor detectate.
 
 \section{Analiza rezultatelor}\label{c_analiza_rezultate}
 In urma testelor efectuate pe sistem s-a constatat ca vizualizarea si interactiunea cu graficele pe un ecran atat de mic cum este cel al unui telefon este dificila. La 
