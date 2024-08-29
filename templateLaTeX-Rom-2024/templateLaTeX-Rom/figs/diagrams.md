@@ -232,15 +232,15 @@ left to right direction
 !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
 !include $ICONURL/common.puml
 !include $ICONURL/font-awesome-6/mobile_screen_button.puml
-FA6_MOBILE_SCREEN_BUTTON(android, Mobile)
-rectangle mqtt as "\nMQTT Broker\n"
+FA6_MOBILE_SCREEN_BUTTON(android, "Telefon\n  Mobil")
+rectangle mqtt as "\nBroker MQTT\n"
 !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
 !include $ICONURL/common.puml
 !include $ICONURL/font-awesome-5/server.puml
-FA5_SERVER(server, Server)
-database mongodb as "\nMongoDB\nDatabase\n"
+FA5_SERVER(server, "Server\nRESTful")
+database mongodb as "\nBaza de date\n   MongoDB\n"
 rectangle house as " " {
-collections sensor as "\nSensors\n"
+collections sensor as "\nSenzori\n"
 !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
 !include $ICONURL/common.puml
 !include $ICONURL/material/router.puml

@@ -4,13 +4,14 @@
 Acest capitol prezinta in detaliu solutia propusa pentru un sistem de monitorizare a calitatii aerului. Aceasta include protocoale de 
 comunicatie, limbaje de programare, arhitecturi de abstractizare si senzorii utilizati pentru masurarea indicilor de calitate a aerului.
 
+\section{Arhitectura sistemului}\label{sec:pi_general_architecture}
 Arhitectura generala a sistemului este compusa din 5 componente pricipale interconectate pentru a crea o retea bine definita si cu o flexibilitate
 ridicata:
 \begin{enumerate}
-	\item Aplicatie Android
-	\item MQTT Broker
-	\item Server
-	\item Baza de date
+	\item Telefon Mobil
+	\item Broker MQTT
+	\item Server RESTful
+	\item Baza de date MongoDB
 	\item Senzor
 \end{enumerate}
 
@@ -20,7 +21,7 @@ Figura \ref{fig:ArhitecturaGenerala} prezinta arhitectura generala a sistemului 
 dintre acestea.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.72]{figs/ArhitecturaGenerala.png}
+    \includegraphics[scale=0.68]{figs/ArhitecturaGenerala.png}
     \caption{Arhitectura generala a proiectului}
     \label{fig:ArhitecturaGenerala}
 \end{figure}
@@ -30,11 +31,12 @@ In intreaga retea este utilizat fusul orar UTC (Timpul Universal Coordonat) pent
 In subcapitolele urmatoare va fi descris in mod detaliat fiecare modul al sistemului si protocoalele de comunicatie utilizate pentru comunicarea dintre 
 acestea.
 
-\section{Aplicatia Android}\label{sec:pi_appandroid}
-Aplicatia Android reprezinta interfata cu utilizatorul oferindui acestuia un mod usor de a gestiona mai multi senzori si de a monitoriza datele venite de la
-acestia. Este scrisa in limbajul de programare Java si ruleaza pe sistemul de operare Android. Proiectul este scris in mediul de dezvoltare integrat Android 
-Studio IDE.
+\section{Modulul Telefon Mobil}\label{sec:pi_appandroid}
+Acest modul este un telefon mobil cu sistem de operare Android pe care a fost dezvoltata o aplicatie. Aplicatia Android reprezinta interfata cu utilizatorul oferindui 
+acestuia un mod usor de a gestiona mai multi senzori si de a monitoriza datele venite de la acestia. Este scrisa in limbajul de programare Java si in mediul de dezvoltare 
+integrat Android Studio IDE.
 
+\subsection{Diagrama de clase}\label{subsec:pi_appandroid_digrama_clase}
 In sistemul de operare Android clasele care definesc o interfata grafica sunt denumite activitati. La deschiderea aplicatiei este deschis firul de executie principal 
 care are sarcina de a afisa interfetele grafice si de a gestiona actiunile utilizatorului, de exemplu, apasare de buton. Fiecare clasa de tip activitate extinde 
 clasa AppCompatActivity care ofera componente pentru afisarea grafica si metode callback pentru gestionarea navigarii intre mai multe activitati. 
@@ -58,23 +60,27 @@ Figura \ref{fig:AndroidClassDiagram} prezinta diagrama de clase a aplicatiei And
     \label{fig:AndroidClassDiagram}
 \end{figure}
 
+\subsection{Procesul de initializare a aplicatiei}\label{subsec:pi_appandroid_initializare}
 La incarcarea primei activitati care este afisata pe ecranul dispozitivului mobil, numita ActivityWelcome, se extrage din memorie o lista de senzori care au fost 
 instalati in prealabil. Daca nu exista senzori instalati, aceasta lista nu va contine elemente. Lista este parcursa si pentru fiecare senzor este pornit un nou 
 fir de executie periodic. Acest fir de executie are rolul de a gestiona conexiunea cu modulul MQTT Broker pentru senzorul respectiv, iar periodicitatea 
 acestuia perimite verificarea si reincercarea conexiunii la un interval fix de timp. Apoi aceasta lista este afisata in interfata grafica. Fiecare element din lista 
 contine: denumirea senzorului, tipul de senzor, statusul conexiunii si o imagine reprezentativa a senzorului.
 
+\subsection{Memorarea senzorilor instalati}\label{subsec:pi_appandroid_memorare_senzori}
 Pentru memorarea senzorilor installati este utilizata biblioteca SharedPreferences. Aceasta contine rutine pentru salvarea datelor intr-un fisier din memoria 
 dispozitivului mobil intr-un format de forma (cheie, valoare). Primul camp din acest fisier reprezinta numarul de senzori salvati, iar campurile ce urmeaza 
 reprezinta senzorii instalati. Aceasta biblioteca este potrivita pentru memorarea datelor sub forma (cheie, valoare) si pentru compatibilitatea cu versiuni mai 
 vechi de Android, spre deosebire de alte biblioteci precum DataStore care sunt potrivite pe seturi de date complexe si functioneaza doar in versiunile mai noi de 
 Android.
 
+\subsection{Fire de executie periodice}\label{subsec:pi_appandroid_fire_executie}
 Pentru firele de executie periodice este utilizata biblioteca ScheduledThreadPoolExecutor. Acesasta permite crearea unui grup de fire de executie care se executa
 in paralel, spre deosebire de biblioteca Timer care are un singur fir de executie, iar o sarcina de durata mai lunga poate intarzia alte sarcini care asteapta 
 executia. De asemenea, in cazul unei erori, doar sarcina in care a aparut eroarea va fi oprita, celelalte sarcini fiind executate in mod obisnuit. Aceasta 
 biblioteca ofera siguranta continuarii executiei aplicatiei in cazul unei erori izolate.
 
+\subsection{Transferul intre activitati}\label{subsec:pi_appandroid_transfer_activitati}
 La selectarea de catre utilizator a unui senzor din lista afisata este deschisa o noua activitate, numita ActivitySensor, iar la atingerea butonului de adaugare a unui 
 nou senzor este deschisa prima activitate din grupul de activitati specifice instalarii. Pentru navigarea la o noua activitate si pentru transferarea de informatii intre 
 activitati este utilizata clasa Intent. Aceasta clasa reprezinta o descriere abstracta a unei operatii. Cea mai semnificativa utilizare a acesteia este pentru operatia de 
@@ -82,6 +88,7 @@ deschidere a unei noi activitati. Pentru aceasta operatie se apeleaza functia st
 necesare pentru ca operatia sa fie executata. Informatii precum activitatea parinte si activitatea care urmeaza a fi executata sunt necesare, iar in plus pot fi adaugate 
 informatii care sa fie transferate catre activitatea copil utilizant functia putExtra() care primeste ca parametru o structura de tipul (cheie, valoare).
 
+\subsection{Conexiunea cu modulul MQTT Broker}\label{subsec:pi_appandroid_conectare_mqtt}
 Pentru fiecare fir de executie specific unui senzor se creaza o instanta a clasei ScheduledDataAcquisition care implementeaza interfata runnable si executa periodic o rutina 
 in care se verifica daca senzorul este conectat la modulul MQTT Broker. La prima executie senzorul este considerat deconectat si se executa rutina de conectare. 
 Aceasta rutina utilizeaza clasa MQTTClient care ofera metodele necesare realizarii si gestionarii conexiunii cu modulul MQTT Broker. Pentru realizarea conexiunii se 
@@ -102,6 +109,7 @@ Clasa MQTTClient utilizeaza o instanta a clasei MqttAndroidClient oferita de bib
 al unui client al protocolului MQTT si are rolul de a gestiona impachetarea messajelor in formatul protocolului MQTT si tranzactionarea acestora cu un server MQTT. De asemenea, 
 clasa MQTTClient defineste rutine de gestionare a exceptilor ridicate de obiectul MqttAndroidClient in cazul unei erori. 
 
+\subsection{Transferul de informatii intre firele de executie}\label{subsec:pi_appandroid_transfer_info_threads}
 Clasa UIThreadHandler are rolul de a efectua modificari in interfetele grafice de pe un fir de executie extern. Clasele de tip activitate sunt executate pe un fir de executie 
 care are rolul strict de a raspunde la actiunile utilizatorului si doar acest fir de executie poate face modificari in interfata grafica, iar interogarea bazei de date sau 
 receptionarea de date de la modulul MQTT sunt executate pe fire de executie diferite. Aceasta clasa realizeaza transferul de date sau evenimente care necesita modificarea 
@@ -112,6 +120,7 @@ defineste in metoda updateMetrics() ce anume va fi modificat in interfata grafic
 notifyListeners() a obiectului UIThreadHander. Aceasta metoda parcurge lista de clase de tip Listener si pentru fiecare apeleaza metoda updateMetrics(). Aceasta metoda nu este 
 apelata direct, ci prin obiectul Handler care primeste ca parametru o rutina de tip Runnable si care este pus intr-o coada de executie a interfetei grafice.
 
+\subsection{Modul de afisare al parametrilor de calitate a aerului}\label{subsec:pi_appandroid_afisare_parametrii_aqi}
 La selectarea unui element din lista de senzori afisata in activitatea ActivityWelcome este creata activitatea ActivitySensor. Rolul acesteia este de a prezenta informatiile 
 senzorului selectat si ultimele valori ale indicilor de calitate a aerului primite de la acesta sub forma unei grile care are 2 coloane si mai multe randuri. La creare 
 se citesc din obiectul Intent primit de la activitatea ActivityWelcome informatiile senzorului intr-un obiect SensorListItem si se afiseaza informatiile senzorului in 
@@ -122,6 +131,7 @@ de a afisa indicii de calitate a aerului sub forma grafica. La crearea activitat
 pentru valorile din ultimele 10 minute. La primirea valorilor citite din baza de date, acestea sunt procesate si afisate in graficul corespunzator. Daca nu exista date 
 in ultimele 10 minute inseamna ca senzorul nu este conectat, iar statusul acestuia este modificat corespunzator.
 
+\subsection{Conexiunea cu baza de date}\label{subsec:pi_appandroid_conexiunea_cu_db}
 Pentru interogarea bazei de date este utilizata biblioteca Retrofit a carei functionalitate teoretica este descrisa in sectiunea \ref{sec:retrofit}. Pentru implementarea 
 rutinelor de interogare a bazei de date utilizand aceasta biblioteca sunt utilizate urmatoarele clase din figura \ref{fig:AndroidClassDiagram}:
 \begin{itemize}
@@ -139,13 +149,14 @@ este receptionat raspunsul de la server sau cand expira timpul de asteptare. La 
 bazat pe clasa model specifica metodei care s-a executat si va crea un obiect de acest tip. In metoda callback se citeste obiectul si se adauga valorile de temperatura si 
 umiditate in graficul respectiv fiecareia. Pentru interpretare, a fost utilizat obiectul GsonConverterFactory care a fost instantiat la crearea obiectului Retrofit.
 
+\subsection{Instalarea unui nou senzor}\label{subsec:pi_appandroid_instalare_senzor}
 Pentru instalarea unui nou senzor, la apasarea butonului de adaugare din activitatea ActivityWelcome se deschide prima activitate din setul de activitati pentru instalare. 
 Aceasta activitate cere utilizatorului inserarea datelor de conectare la senzor oferite in manualul de instalare. La apasarea butonului Next se deschide a activitatea de 
 instalare specifica pasului doi in care se cere introducerea informatiilor router-ului prin care i se ofera senzorului access la internet. Al treila pas este reprezentat 
 printr-o activitate care afiseaza durata si progresul procesului de instalare. La acest pas se realizeaza conexiunea completa a senzorului. La finalizeara conexiunii apare 
 in activitate un buton care va redeschide activitatea ActivityWelcome, iar noul senzor adaugat va fi afisat in lista acesteia. 
 
-\section{MQTT Broker}\label{sec:pi_mqttbroker}
+\section{Modulul Broker MQTT}\label{sec:pi_mqttbroker}
 Acest modul reprezinta punctul central al transmisiei in timp real al datelor achizitionate de senzor catre aplicatia Android.
 
 Figura \ref{fig:MQTTBrokerInside} prezinta arhitectura interna a modulului MQTT Broker compusa din serverul MQTT Mosquitto oferit de organizatia Eclipse si o aplicatie 
@@ -157,11 +168,13 @@ Python.
     \label{fig:MQTTBrokerInside}
 \end{figure}
 
+\subsection{Modulul Mosquitto MQTT Broker}\label{subsec:pi_mqttbroker_server}
 Modulul Mosquitto MQTT Broker este instalat pe o masina virtuala cu un sistem de operare linux utilizand comanda "sudo apt-get install mosquitto mosquitto-clients -y". 
 In mod implicit acesta este configurat sa comunice pe portul 1883, dar poate fi modificat accesand fisierul de configurare "/etc/mosquitto/mosquitto.conf". Pentru 
 pornirea serverului trebuie executata comanda "sudo systemctl start mosquitto", iar pentru pornirea automata la deschiderea sistemului de operare linux se executa 
 comanda "sudo systemctl enable mosquitto".
 
+\subsection{Modulul Wildcard MQTT Subscriber}\label{subsec:pi_mqttbroker_wildcard}
 Modulul Wildcard MQTT Subscriber este o aplicatie scrisa in limbajul de programare Python care are rolul de a intercepta toate mesajele care ajung in Broker de la dispozitivele 
 cu rol de publicator si de a le transmite catre modulul RESTful Server pentru memorarea acestora in baza de date. In structura unei retele MQTT, aceasta aplicatie are un rol 
 special de abonator pentru toate mesajele de date care ajung in Broker de la publicatori. Pentru a realiza aceasta abonare, aplicatia trimite o cerere de abonare catre 
@@ -184,10 +197,11 @@ Figura \ref{fig:Mqtt2AndroidDataFormat} prezinta formatul JSON al mesajului tran
     \label{fig:Mqtt2AndroidDataFormat}
 \end{figure}
 
-\section{RESTful Server}\label{sec:pi_restserver}
+\section{Modulul Server RESTful}\label{sec:pi_restserver}
 Modulul RESTful Server reprezinta punctul de legatura intre aplicatia Android si baza de date si intre modulul MQTT Broker si baza de date. Acesta este implementat in limbajul 
 de programare Python si utilizeaza biblioteca Flask. Pentru comunicarea cu acesta este utilizat protocolul HTTP. 
 
+\subsection{Arhitectura serverului}\label{subsec:pi_restserver_arhitectura}
 Figura \ref{fig:PI_RealFlaskProjectStructure} prezinta structura fisierelor proiectului Python utilizand Flask. 
 \begin{figure}[H]
     \centering
@@ -200,11 +214,12 @@ Structura fisierelor proiectului respecta structura de baza a unui proiect Pytho
 modularizarea codului sursa conform modelului arhitectural MVC, Model-View-Controller. In urmatoarele paragrafe se va descrie fiecare modul continut in directorul 
 src/ si care sunt functiile acestora.
 
+\subsection{Descrierea modului de functionare}\label{subsec:pi_restserver_functionare}
 Fisierul sensor\_data\_routes.py reprezinta punctul de intrare in aplicatie. Acesta contine o corelare intre adresele URL pe care server-ul le cunoaste si clasele model 
 sub forma de resurse. O adresa URL identifica unic o resursa sau o clasa model. Orice cerere HTTP care vine din retea, de la aplicatia Android sau de la modulul MQTT Broker, 
 vor fi validate in acest modul pe baza andresei URL.
 
-Fisierul sensor\_data\_controller.py reprezinta punctul de control al aplicatiei. Acesta primeste de la modulul Routes resursa care va fi accesata din baza de date, 
+Fisierul sensor\_data\_controller.py reprezinta punctul central al aplicatiei. Acesta primeste de la modulul Routes resursa care va fi accesata din baza de date, 
 identifica metoda HTTP si argumentele acesteia, valideaza aceste informatii si transmite catre modulul Model interogarea specifica resursei. La primirea datelor de la 
 modulul Model, acesta va transmite catre modulul View datele receptionate pentru a fi formatate corespunzator, iar apoi va transmite raspunsul catre entitatea care a transmis 
 cererea.
@@ -224,6 +239,7 @@ date pentru valorile de calitate a aerului dintr-o anumita perioada. Raspunsul p
     \label{fig:Server2AndroidDataFormat}
 \end{figure}
 
+\subsection{Formatarea marcajului temporal}\label{subsec:pi_restserver_timestamp}
 O problema bine cunoscuta a bibliotecii datetime din limbajului de programare Python si care a fost intampinata la formatarea datelor in modulul View este fusul orar. 
 Atunci cand un sir de caractere este convertit in formatul datetime sau invers, acesta nu contine informatii legate de fusul orar, UTC sau local. Sirul de caractere 
 '2024-06-16T11:23:53.015001Z' va fi interpretat ca un obiect de tipul datetime din care informatia 'Z', care reprezinta fusul orar UTC, este pierduta. 
@@ -234,7 +250,7 @@ caractere in format GSON pe o clasa model nu interpreteaza corect sirul '+00:00'
 de caractere '00:00' cu 'Z'. O alta rezolvare a acestei problema ar fi fost scrierea manuala a codului pentru maparea datelor pe o clasa model in loc de utilizarea uneia deja 
 existente in biblioteca Retrofit. 
 
-\section{Baza de date MongoDB}\label{sec:pi_bazadedate}
+\section{Modulul baza de date MongoDB}\label{sec:pi_bazadedate}
 Acest modul are rolul de a memora datele transmise de catre senzori si de a facilita extractia acestora la cererea utilizatorilor. Acesta comunica prin intermediul 
 protocolului de comunicatie TCP/IP Sockets cu serverul RESTful, acesta din urma reprezentand interfata de comunicare dintre modulele MQTT Broker si Mobile cu baza 
 de date. 
@@ -242,6 +258,7 @@ de date.
 Baza de date MongoDB ofera un mod eficient si optimizat de memorare a datelor care contin o unitate de timp, numit Time Series Collection. Acest lucru face ca aceasta 
 baza de date sa fie cea mai potrivita pentru proiectele din domeniul IoT in care momentul de timp la care datele sunt colectate este foarte important.
 
+\subsection{Structura bazei de date}\label{subsec:pi_bazadedate_structura}
 Figura \ref{fig:PI_MongodbDocExample} prezinta structura unui document memorat in baza de date. 
 \begin{figure}[H]
     \centering
@@ -264,6 +281,7 @@ la un moment de timp. Structura unui document contine urmatoarele campuri:
 	\item Campul "\_id" - reprezinta un sir de caractere generat automat la memorarea documentului care identifica unic acest document.
 \end{itemize}
 
+\subsection{Interogarea bazei de date}\label{subsec:pi_bazadedate_interogare}
 Figura \ref{fig:PI_AggregationExample} prezinta operatia de agregare utilizata pentru extragerea documentelor care se afla intr-un anumit interval de timp. Prima 
 operatie efectuata este "\$match" care va selecta din baza de date toate documentele care se afla intr-un anumit interval de timp. A doua operatie efectuata este 
 tot operatia "\$match" care va selecta din documentele care au indeplinit conditia primei operatii, doar documentele care au o anumita adresa MAC si care contin 
@@ -278,7 +296,8 @@ doua operatii, care sunt mult mai costisitoare, este diminuat semnificativ.
     \label{fig:PI_AggregationExample}
 \end{figure}
 
-\section{Senzor}\label{sec:pi_senzor}
+\section{Moulul Senzor}\label{sec:pi_senzor}
+\subsection{Arhitectura modulului Senzor}\label{subsec:pi_senzor_arhitectura}
 Acest modul este compus din doua componente principale, un dispozitiv care are capabilitatile de a esantiona indici de calitate a aerului si de a comunica 
 printr-un mediu fara fir si un router care realizeaza legatura dintre reteaua locala si internet. Rolul acestui modul este de a realiza o conexiune cu un router,
 de a achizitiona date de calitate a aerului si de a le transmite catre aplicatia Android. 
@@ -291,6 +310,7 @@ Figura \ref{fig:PI_SensorUnitDiagram} prezinta arhitectura detaliata a modulului
     \label{fig:PI_SensorUnitDiagram}
 \end{figure} 
 
+\subsection{Platforma de dezvoltare Arty Z7}\label{subsec:pi_senzor_artyz7}
 De pe platforma Arty Z7 sunt utilizate cele doua porturi Pmod si 5 pini de pe conectorii J2 si J7. Senzorul HDC1080 este conectat la conectorul PmodB, iar senzorul 
 SGP40 la placa de circuite integrate PmodHYGRO in conectorul pus la dispozitie pentru legarea mai multor senzori in serie. Acesti 2 senzori sunt conectati la aceeasi 
 magistrala I2C si sunt diferentiati prin adresare. Controlerul de retea ATWINC1500 este conectat la portul PmodA al placii Arty Z7, iar senzorul SPS30 la conectorii J2 
@@ -300,12 +320,13 @@ si pentru comunicatia cu un calculator personal prin interfata de comunicare UAR
 Conectorii Pmod de pe placa de dezvoltare Arty Z7 ofera pini pentru alimentarea cu 3.3V. Senzorul SPS30 trebuie alimentat la tensiunea de 5V care este disponibila pe 
 conectorul J7. 
 
-Pentru realizarea schemei arhitecturale a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3 \cite{zynq7000ug892}, iar pentru dezvoltarea codului sursa in limbajul 
+Pentru realizarea schemei de design a fost utilizat mediul de dezvoltare Xilinx Vivado 2018.3 \cite{zynq7000ug892}, iar pentru dezvoltarea codului sursa in limbajul 
 de programare C a fost utilizat mediul de dezvoltare Xilinx SDK 2018.3 \cite{zynq7000ug1145}. Procesorul ARM Cortex-A9 \cite{zynq7000ug585} este utilizat pentru 
 executarea instructiunilor microcontroller-ului, iar partea logica pentru conectarea porturilor necesare la microcontroller. Au fost alese mediile de dezvoltare cu 
 versiunea 2018.3 din cauza unor probleme de integrare intampinate utilizand mediul de dezvoltare Vitis. Mai exact, generarea automata a librariei pe baza fisierului 
 ".xsa" genera multiple erori. Versiunea 2018.3 a fost aleasa pe baza experientei din trecut.
 
+\subsection{Diagrama de proiectare a procesorului Zynq 7000}\label{subsec:pi_senzor_designzynq}
 Schema de design a platformei Arty Z7 contine un set de periferice si porturi care sunt conectate la procesorul ARM Cortex-A9 si un set de periferice si porturi 
 conectate la partea logica FPGA. De exemplu, porturile pmod sunt conectate la partea logica, iar portul MicroUSB este conectat la procesor. Pentru utilizarea 
 componentelor sau porturilor periferice conectate la partea logica FPGA in procesorul ARM Cortex-A9 este utilizata interfata EMIO care este o extensie a 
@@ -315,7 +336,7 @@ Figura \ref{fig:PI_ZynqBlockDesign} prezinta interconexiunea dintre procesor si 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.6]{figs/PI_ZynqBlockDesign.png}
-    \caption{Diagrama de proiectare}
+    \caption{Diagrama de proiectarea procesorului Zynq 7000}
     \label{fig:PI_ZynqBlockDesign}
 \end{figure}
 
@@ -342,7 +363,7 @@ Pentru creearea diagramei de proiectare in mediul de lucru Vivado 2018.3 sunt ne
 	\item Prin apasarea butonului "Add IP" din fereastra design-ului se adauga procesorul Zynq7000.
 	\item Prin dublu click pe blocul nou aparut al procesorului se deschide meniul de configurare al acestuia. Din acest meniu se selecteaza sursa de ceas si frecventa 
 	acestuia, liniile de intrare iesire si perifericele utilizate.
-    \item La apasarea butonului "OK" vor aparea pe blocul procesorului toate perifericele care se conecteaza la o componenta externa.
+    \item La apasarea butonului "OK" vor aparea pe blocul procesorului toate perifericele selectate la pasul anterior care urmeaza a fi conectate la o componenta externa.
     \item Crearea porturilor externe se face prin click dreapta pe diagrama si "Create port". Acestuia i se atribuie un nume, o directie si un tip.
     \item Pe baza diagramei create Vivado va genera automat instructiunile necesare maparii porturilor prin click dreapta pe fisierul designului si "Create HDL Wrapper".
     \item Se genereaza sirul de biti pentru partea logica FPGA prin apasarea butonului "Generate Bitstream".
@@ -353,18 +374,22 @@ Pentru creearea diagramei de proiectare in mediul de lucru Vivado 2018.3 sunt ne
 Alegerea frecventei sursei de ceas este in stransa legatura cu modulele timer necesare functionarii aplicatiei, si anume, doua module timer care numara la milisecunda. 
 Pentru a obtine o acuratete cat mai buna a milisecundei, sursa de ceas este multiplicata cu un factor de 16, obtinand astfel o frecventa a sursei de ceas de 400Mhz.
 
+\subsection{Structura proiectului de pe Zynq 7000}\label{subsec:pi_senzor_structurasdk}
+Driverul generat automat de catre mediul de dezvoltare Xilinx SDK se afla intr-un proiect separat numit "zynq7000\_atwinc\_sdk\_bsp". Acest proiect este generat automat 
+bazat pe fisierul ".hdf" exportat de mediul de dezvoltare Vivado.
+
+Proiectele necesare pentru incarcarea codului sursa in memoria flash a procesorului sunt separate de proiectul care contine implementarea efectiva a functionalitatii 
+senzorului. Acestea se numesc zynq7000\_atwinc\_sdk\_FSBL\_bsp si zynq7000\_atwinc\_sdk\_FSBL si sunt generate automat de mediul de dezvoltare Xilinx SDK. 
+
 Figura \ref{fig:PI_SDKFileStructure} prezinta structura fisierelor proiectului in mediul de programare Xilinx SDK. Fiecare director reprezinta un modul al proiectului 
 si contine fisere asociate cu denumirea acestuia. Structura fisierelor a fost impartita in doua imagini asezate in paralel pentru a reduce inaltimea acesteia. Fisierele 
 prezentate in imaginea din dreapta se afla sub directorul "src" exceptand fisierele "main.c" si "lscript.ld".
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.66]{figs/PI_SDKFileStructure.png}
+    \includegraphics[scale=0.60]{figs/PI_SDKFileStructure.png}
     \caption{Structura fisierelor proiectului}
     \label{fig:PI_SDKFileStructure}
 \end{figure}
-
-Driverul generat automat de catre mediul de dezvoltare Xilinx SDK se afla intr-un proiect separat numit "Zynq7000\_atwinc\_sdk\_bsp". Acest proiect este generat automat 
-bazat pe fisierul ".hdf" exportat de mediul de dezvoltare Vivado.
 
 Directorul "Application" contine fisiere sursa si antet specifice aplicatiei. Fisierul "acquisition.c" contine rutine pentru initializarea si gestionarea achizitiei 
 de date de la senzorul de temperatura si umiditate HDC1080. Acesta contine o masina de stari care initiaza o noua achizitie de date, asteapta finalizarea acesteia, 
@@ -422,6 +447,7 @@ Directorul "sensirion\_gas\_index\_algorithm" contine algoritmul pentru interpre
 
 Fisierul lscript.ld reprezinta fisierul care defineste adresa de baza a memoriei unde este scris codul sursa, dimensiunea memoriilor RAM si dimensiunea stivei.
 
+\subsection{Diagrama de stari a proiectului de pe Zynq 7000}\label{subsec:pi_senzor_statediagram}
 Figura \ref{fig:PI_MainStateMachine} prezinta principalele sarcini si evenimente ale senzorului.
 \begin{figure}[H]
     \centering
