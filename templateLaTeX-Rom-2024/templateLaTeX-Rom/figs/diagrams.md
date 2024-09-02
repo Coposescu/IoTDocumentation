@@ -525,7 +525,6 @@ if (Have saved AP info?) then (Yes)
     :Initialize MQTT module;
     :Connect Socket;
     :Connect to MQTT Broker; 
-    :Subscribe for Alarms;
     repeat
         if (Queue Empty?) then (No)
             :Prepare packet;
@@ -547,6 +546,53 @@ else (No)
     :Close AP Mode;
 endif
 repeat while
+
+@enduml
+```
+
+```plantuml
+@startuml
+!pragma teoz true
+
+actor Utilizator as utilizator
+participant "Broker MQTT" as broker #808080
+participant "Interceptor MQTT" as wildcard #808080
+participant "Server RESTful" as server #808080
+participant MongoDB as database #808080
+participant Senzor as sensor
+
+activate broker
+activate wildcard
+activate server
+activate database
+
+wildcard -> broker : Conexiune Locala
+& wildcard -> server : Conexiune Locala
+& server -> database : Conexiune Locala
+wildcard -> broker : Abonare #
+
+...
+utilizator -[#red]> utilizator : Start AplicatieS
+activate utilizator
+utilizator -> broker: Conexiune Remote
+utilizator -> broker: Abonare S1
+activate sensor
+sensor -> broker: Conexiune Remote
+sensor -> broker: Publish S1
+broker -> wildcard: Publish S1
+wildcard -> server: HTTP PUT Publish S1
+& broker -> utilizator: Publish S1
+server -> database: Inserare Publish S1
+& utilizator -[#blue]> utilizator: Afisare date
+database -> server: Success
+server -> wildcard: HTTP Response
+...
+utilizator -[#red]> utilizator: Deschidere fereastra grafice
+utilizator -> server: HTTP GET (10m)
+server -> database: Operatie agregare
+database -> server: Date
+server -> utilizator: HTTP Response
+utilizator -[#blue]> utilizator: Afisare Grafica
 
 @enduml
 ```

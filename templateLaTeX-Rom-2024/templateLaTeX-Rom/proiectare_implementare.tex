@@ -178,9 +178,7 @@ comanda "sudo systemctl enable mosquitto".
 Modulul Wildcard MQTT Subscriber este o aplicatie scrisa in limbajul de programare Python care are rolul de a intercepta toate mesajele care ajung in Broker de la dispozitivele 
 cu rol de publicator si de a le transmite catre modulul RESTful Server pentru memorarea acestora in baza de date. In structura unei retele MQTT, aceasta aplicatie are un rol 
 special de abonator pentru toate mesajele de date care ajung in Broker de la publicatori. Pentru a realiza aceasta abonare, aplicatia trimite o cerere de abonare catre 
-Broker pentru topicul "readings/\#" care specifica abonarea pentru toate topicurile care incep cu "readings/" si contin orice altceva in rest '\#'. Mesajele de configurare 
-sau alarmele transmise intre aplicatia Android si senzor nu vor fi interceptate de acest abonator, doarece topicurile respective incep cu sirul de caractere "config/" sau 
-"alarm/".
+Broker pentru topicul "readings/\#" care specifica abonarea pentru toate topicurile care incep cu "readings/" si contin orice altceva in rest '\#'.
 
 Pentru implementarea aplicatiei Python este utilizata biblioteca "paho.mqtt.cient". Aceasta ofera rutine ajutatoare pentru crearea unui client cu rol de abonator sau publicator 
 intr-o retea MQTT. De asemenea, ofera rutine de callback care permit realizarea anumitor actiuni atunci cand au loc evenimente precum receptia unui mesaj, connectarea cu 
@@ -483,9 +481,6 @@ In starea "Connect Socket" se creeaza un canal de comunicatie si se realizeaza c
 
 Dupa conectarea cu success la platforma in care ruleaza Brokerul MQTT, in starea "Connect to MQTT Broker", se realizeaza conexiunea cu acesta prin transmiterea 
 pachetului MQTT CONNECT.
-
-In starea "Subscribe for alarms" senzorul transmite un mesaj Brokerului MQTT prin care cere subscriptia la topicul pentru configurari. Acest topic este utilizat pentru 
-receptia de mesaje de configurare de la aplicatia Android.
 
 Daca in oricare din starile care presupun o conexiune cu un modul extern are loc o eroare se va aplica un algoritm de crestere exponentiala a timpului dintre 
 reincercari. Acest algoritm incepe cu o reincercare imediata, apoi va reincerca conexiunea dupa 10 secunde, dupa 30 de secunde, dupa un minut si in final la fiecare 
